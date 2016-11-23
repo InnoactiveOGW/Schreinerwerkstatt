@@ -19,12 +19,10 @@ public class myDivider : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        //   Destroy(this.gameObject);
-        if (other.gameObject.tag == "saw")
-        {
-            // myObject.transform.position = new Vector3(0, (float)2.22, -2);
-            transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y, transform.localScale.z / 2);
+        Tool t = other.GetComponent<Tool>();
+        if (t) {
+            Debug.Log("tool used: " + t.ToString());
+            t.doAction(this.gameObject);
         }
-
     }
 }

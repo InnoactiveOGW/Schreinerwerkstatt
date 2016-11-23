@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class ControllerInput : MonoBehaviour
 {
@@ -7,6 +8,7 @@ public class ControllerInput : MonoBehaviour
     public float pickupRadius = 1f;
     Pickup pickedObject;
 
+    HapticFeedbackController hfc;
     SteamVR_TrackedObject inputDevice;
     SteamVR_Controller.Device controller
     {
@@ -19,16 +21,16 @@ public class ControllerInput : MonoBehaviour
     void Start()
     {
         inputDevice = GetComponentInChildren<SteamVR_TrackedObject>();
+        hfc = GetComponentInParent<HapticFeedbackController>();
     }
 
     void Update()
     {
-        if (controller == null) {
-
-        }
-
-        if (controller.GetPressDown(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger))
+        if (pickedObject == null && controller.GetPressDown(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger))
         {
+           
+            
+
             Collider[] pickups = Physics.OverlapSphere(transform.position, pickupRadius);
             if (pickups != null)
             {
@@ -38,13 +40,15 @@ public class ControllerInput : MonoBehaviour
                 foreach (Collider collider in pickups)
                 {
                     var currDis = Vector3.Distance(collider.transform.position, transform.position);
-                    if (currDis < minDis) {
+                    if (currDis < minDis)
+                    {
                         minDis = currDis;
-                        nearestCollider = collider; 
+                        nearestCollider = collider;
                     }
                 }
 
-                if (nearestCollider) {
+                if (nearestCollider)
+                {
                     Pickup pickup = nearestCollider.GetComponent<Pickup>();
                     if (pickup != null)
                     {
@@ -60,26 +64,33 @@ public class ControllerInput : MonoBehaviour
                             rb.constraints = RigidbodyConstraints.FreezeAll;
                         }
                         pickedObject = pickup;
+
+                        //TODO - feedback for user -> vibration?
+                        //controller.TriggerHapticPulse(2000);
+                        
+                        // SteamVR_Controller.Input((int)inputDevice.index).TriggerHapticPulse(2000);
                     }
                 }
-
             }
         }
 
-        if (controller.GetPressUp(Valve.VR.EVRButtonId.k_EButton_Grip))
+        if (pickedObject != null && controller.GetPressUp(Valve.VR.EVRButtonId.k_EButton_Grip))
         {
-            if (pickedObject != null)
+            pickedObject.GetReleased(controller.velocity);
+            Rigidbody rb = pickedObject.GetComponent<Rigidbody>();
+            if (rb)
             {
-                pickedObject.GetReleased(controller.velocity);
-                Rigidbody rb = pickedObject.GetComponent<Rigidbody>();
-                if (rb)
-                {
-                    rb.constraints = RigidbodyConstraints.None;
-                }
-
-                pickedObject = null;
+                rb.constraints = RigidbodyConstraints.None;
             }
+
+            pickedObject = null;
         }
 
+    }
+
+    void hapticFeedback() {
+        // TODO: setup values for vibration
+        if (hfc)
+            hfc.StartHapticVibration(controller, 0.1f, 0.1f);
     }
 }

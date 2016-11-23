@@ -13,4 +13,9 @@ public class Pickup : MonoBehaviour
         transform.SetParent(null);
         GetComponent<Rigidbody>().velocity = velocity;
     }
+
+    public virtual void doAction(GameObject g)
+    {
+        Debug.Log("Normal pickup object");
+    }
 }
