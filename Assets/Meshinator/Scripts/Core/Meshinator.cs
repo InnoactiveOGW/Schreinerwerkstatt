@@ -146,28 +146,35 @@ public class Meshinator : MonoBehaviour
 			// Find the impact point
 			foreach (ContactPoint contact in collision.contacts)
 			{
-				if (contact.otherCollider == collision.collider)
+                Tool t = collision.gameObject.GetComponent<Tool>();
+
+                if (contact.otherCollider == collision.collider && t != null)
 				{
+                    Debug.Log("Tool hit wood");
 
-                    Impact(contact.point, collision.impactForceSum, m_ImpactShape, m_ImpactType);
-                   
+                    //Impact(contact.point, collision.impactForceSum, m_ImpactShape, m_ImpactType);
+
                     // TODO
-                    //Vector3 newV3 = new Vector3();
-                    //newV3 = this.transform.position - contact.point;
-                    //var distanceCenterToContact = newV3.z;
-                    //// Math.Abs(newV3.z) / this.transform.localScale.z;
+                    Vector3 localContactPoint = this.transform.position - contact.point;
+                    var dcc = localContactPoint.z;
+                    // Math.Abs(newV3.z) / this.transform.localScale.z;
 
-                    //var zNeu = ((this.transform.localScale.z / 2) + distanceCenterToContact);
-                   
+                    var scaleA1 = ((this.transform.localScale.z / 2) + dcc);
+                    var scaleA2 = this.transform.localScale.z - scaleA1;
 
-                    //var zVerschiebung = (this.transform.localScale.z/2  - zNeu)/2;
-                    //this.gameObject.transform.localScale = new Vector3(this.gameObject.transform.localScale.x, this.gameObject.transform.localScale.y, zNeu);
-                    //this.gameObject.transform.position = new Vector3(this.transform.position.x, this.transform.position.y, this.transform.position.z + zVerschiebung);
+                    if (scaleA1 > this.gameObject.transform.localScale.z)
+                        break;
+                    
+                    this.gameObject.transform.localScale = new Vector3(this.gameObject.transform.localScale.x, this.gameObject.transform.localScale.y, scaleA1);
+
+                    var posA1 = (this.transform.localScale.z / 2) - dcc;
+                    var posA2 = this.transform.localScale.z / 2 + dcc;
+                    this.gameObject.transform.position = new Vector3(this.transform.position.x, this.transform.position.y, this.transform.position.z + posA1);
 
 
-                    //GameObject newGO1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    //newGO1.transform.position = newP1;
-                   
+                    // GameObject newGO1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    // newGO1.transform.position = newP1;
+
                     break;
 				}
 			}

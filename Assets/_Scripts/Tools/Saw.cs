@@ -15,9 +15,9 @@ public class Saw : Tool {
 
     public override void doAction(GameObject g)
     {
-        Debug.Log("Saw object");
-        var transform = g.transform;
-        transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y, transform.localScale.z / 2);
+        Debug.Log("Saw object collided");
+        // var transform = g.transform;
+        // transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y, transform.localScale.z / 2);
     }
 
     

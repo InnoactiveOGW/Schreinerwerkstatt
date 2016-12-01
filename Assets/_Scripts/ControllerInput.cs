@@ -49,6 +49,15 @@ public class ControllerInput : MonoBehaviour
 
                 if (nearestCollider)
                 {
+                    WoodCreator wc = nearestCollider.GetComponent<WoodCreator>();
+                    if (wc != null) {
+                        wc.createNewWood();
+                        Renderer wcRend =  wc.gameObject.GetComponent<Renderer>();
+                        Material wcMat = wcRend.material;
+                        wcMat.color = new Color(Random.value, Random.value, Random.value);
+                        return;
+                    }
+
                     Pickup pickup = nearestCollider.GetComponent<Pickup>();
                     if (pickup != null)
                     {
