@@ -6,6 +6,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(Rigidbody))]
@@ -147,8 +148,27 @@ public class Meshinator : MonoBehaviour
 			{
 				if (contact.otherCollider == collision.collider)
 				{
-					Impact(contact.point, collision.impactForceSum, m_ImpactShape, m_ImpactType);
-					break;
+
+                    Impact(contact.point, collision.impactForceSum, m_ImpactShape, m_ImpactType);
+                   
+                    // TODO
+                    //Vector3 newV3 = new Vector3();
+                    //newV3 = this.transform.position - contact.point;
+                    //var distanceCenterToContact = newV3.z;
+                    //// Math.Abs(newV3.z) / this.transform.localScale.z;
+
+                    //var zNeu = ((this.transform.localScale.z / 2) + distanceCenterToContact);
+                   
+
+                    //var zVerschiebung = (this.transform.localScale.z/2  - zNeu)/2;
+                    //this.gameObject.transform.localScale = new Vector3(this.gameObject.transform.localScale.x, this.gameObject.transform.localScale.y, zNeu);
+                    //this.gameObject.transform.position = new Vector3(this.transform.position.x, this.transform.position.y, this.transform.position.z + zVerschiebung);
+
+
+                    //GameObject newGO1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    //newGO1.transform.position = newP1;
+                   
+                    break;
 				}
 			}
 		}
@@ -170,25 +190,27 @@ public class Meshinator : MonoBehaviour
 
 	public void Impact(Vector3 point, Vector3 force, ImpactShapes impactShape, ImpactTypes impactType)
 	{
-		// See if we can do this right now
-		if (!CanDoImpact(point, force))
-			return;
-		
-		// We're now set on course to calculate the impact deformation
-		m_Calculating = true;
+        // TODO
+        // See if we can do this right now
+        if (!CanDoImpact(point, force))
+            return;
+
+        // We're now set on course to calculate the impact deformation
+        m_Calculating = true;
 		
 		// Set up m_Hull
 		InitializeHull();
 
-		// Figure out the true impact force
-		if (force.magnitude > m_MaxForcePerImpact)
-			force = force.normalized * m_MaxForcePerImpact;
-		float impactFactor = (force.magnitude - m_ForceResistance) * m_ForceMultiplier;
-		if (impactFactor <= 0)
-			return;
+        // TODO
+        // Figure out the true impact force
+        if (force.magnitude > m_MaxForcePerImpact)
+            force = force.normalized * m_MaxForcePerImpact;
+        float impactFactor = (force.magnitude - m_ForceResistance) * m_ForceMultiplier;
+        if (impactFactor <= 0)
+            return;
 
-		// Localize the point and the force to account for transform scaling (and maybe rotation or translation)
-		Vector3 impactPoint = transform.InverseTransformPoint(point);
+        // Localize the point and the force to account for transform scaling (and maybe rotation or translation)
+        Vector3 impactPoint = transform.InverseTransformPoint(point);
 		Vector3 impactForce = transform.InverseTransformDirection(force.normalized) * impactFactor;
 		
 		// Limit the force by the extents of the initial bounds to keep things reasonable
@@ -200,6 +222,7 @@ public class Meshinator : MonoBehaviour
 		// Run the mesh deformation on another thread
 		ThreadManager.RunAsync(()=>
 		{
+            // magic happens here!
 			// Do all the math to deform this mesh
 			m_Hull.Impact(impactPoint, impactForce, impactShape, impactType);
 			
