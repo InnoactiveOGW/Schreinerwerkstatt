@@ -132,11 +132,14 @@ public class Meshinator : MonoBehaviour
 				m_ClearedForCollisions = true;
 		}
 	}
-	
-	#endregion Unity Functions
-	
-	#region Collision Callback Functions
-	
+
+    #endregion Unity Functions
+
+    #region Collision Callback Functions
+
+    GameObject clone;
+    bool canBeCloned = true;
+
 	public void OnCollisionEnter(Collision collision)
 	{
 		m_CollisionCount++;
@@ -148,40 +151,64 @@ public class Meshinator : MonoBehaviour
 			{
                 Tool t = collision.gameObject.GetComponent<Tool>();
 
-                if (contact.otherCollider == collision.collider && t != null)
+                if (contact.otherCollider == collision.collider && t != null && this.canBeCloned)
 				{
                     Debug.Log("Tool hit wood");
 
                     //Impact(contact.point, collision.impactForceSum, m_ImpactShape, m_ImpactType);
 
                     // TODO
-                    Vector3 localContactPoint = this.transform.position - contact.point;
+                    Vector3 originalPosition = this.gameObject.transform.position;
+                    Vector3 originalScale = this.gameObject.transform.localScale;
+                    if(this.canBeCloned) {
+                        //this.canBeCloned = false;
+                        StartCoroutine(toggleCloneability());
+                        Debug.Log("instance ID: " + this.gameObject.GetInstanceID() + "canBeCloned: " + canBeCloned.ToString());
+                        clone = GameObject.Instantiate(this.gameObject);
+                        Meshinator clonedMeshinator = clone.GetComponent<Meshinator>();
+                        if (clonedMeshinator != null) {
+                            StartCoroutine(clonedMeshinator.toggleCloneability());
+                            Debug.Log("instance ID: " + clonedMeshinator.gameObject.GetInstanceID() + "canBeCloned: " + clonedMeshinator.canBeCloned.ToString());
+                        }
+                    }
+                    Vector3 localContactPoint = originalPosition - contact.point;
                     var dcc = localContactPoint.z;
                     // Math.Abs(newV3.z) / this.transform.localScale.z;
 
-                    var scaleA1 = ((this.transform.localScale.z / 2) + dcc);
-                    var scaleA2 = this.transform.localScale.z - scaleA1;
-
-                    if (scaleA1 > this.gameObject.transform.localScale.z)
-                        break;
+                    var scaleA1 = ((originalScale.z / 2) + dcc);
+                    var scaleA2 = originalScale.z - scaleA1;
                     
-                    this.gameObject.transform.localScale = new Vector3(this.gameObject.transform.localScale.x, this.gameObject.transform.localScale.y, scaleA1);
+                    if (scaleA1 > originalScale.z || scaleA2 > originalScale.z)
+                        break;
 
-                    var posA1 = (this.transform.localScale.z / 2) - dcc;
-                    var posA2 = this.transform.localScale.z / 2 + dcc;
-                    this.gameObject.transform.position = new Vector3(this.transform.position.x, this.transform.position.y, this.transform.position.z + posA1);
+                    Vector3 newScale1 = new Vector3(originalScale.x, originalScale.y, scaleA1);
+                    Vector3 newScale2 = new Vector3(originalScale.x, originalScale.y, scaleA2);
+                    this.gameObject.transform.localScale = newScale1;
+                    var posA2 = localContactPoint.z + scaleA2 / 2;
+                    
+                    clone.transform.localScale = newScale2;
 
-
-                    // GameObject newGO1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    // newGO1.transform.position = newP1;
+                    var posA1 = scaleA1 / 2 - dcc;
+                    clone.transform.position = new Vector3(originalPosition.x, originalPosition.y, originalPosition.z - posA2);
+                    this.gameObject.transform.position = new Vector3(originalPosition.x, originalPosition.y, originalPosition.z + posA1);
+                    
 
                     break;
 				}
 			}
 		}
 	}
-	
-	public void OnCollisionExit()
+    
+    public IEnumerator toggleCloneability()
+    {
+        this.canBeCloned = false;
+        Debug.Log("instance ID: " + this.gameObject.GetInstanceID() + "canBeCloned: " + canBeCloned.ToString());
+        yield return new WaitForSeconds(3);
+        this.canBeCloned = true;
+        Debug.Log("instance ID: " + this.gameObject.GetInstanceID() + "canBeCloned: " + canBeCloned.ToString());
+    }
+
+    public void OnCollisionExit()
 	{
 		m_CollisionCount--;
 	}

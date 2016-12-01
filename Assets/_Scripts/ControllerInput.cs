@@ -58,21 +58,35 @@ public class ControllerInput : MonoBehaviour
                         return;
                     }
 
-                    Pickup pickup = nearestCollider.GetComponent<Pickup>();
-                    if (pickup != null)
+                    Tool tool = nearestCollider.GetComponent<Tool>();
+                    Pickup pickup = null;
+                    if (tool == null) { 
+                        pickup = nearestCollider.GetComponent<Pickup>();
+                        if (pickup)
+                        {
+                            pickup.GetPickedUp(gameObject);
+                            Rigidbody rb = pickup.GetComponent<Rigidbody>();
+                            if (rb)
+                            {
+                                rb.constraints = RigidbodyConstraints.FreezeAll;
+                            }
+                            pickedObject = pickup;
+                        }
+                    }
+                    else
                     {
-                        pickup.GetPickedUp(gameObject);
-                        pickup.transform.rotation = controller.transform.rot;
+                        tool.GetPickedUp(gameObject);
 
-                        pickup.transform.localPosition = new Vector3(0, 0, 0);
+                        tool.transform.rotation = controller.transform.rot;
+                        tool.transform.localPosition = new Vector3(0, 0, 0);
                         // -> muss in das jeweilige Objekt ausgelagert werden, jedes Objekt muss selbst wissen wo sich der Ankerpunkt des Controllers befinden soll!
 
-                        Rigidbody rb = pickup.GetComponent<Rigidbody>();
+                        Rigidbody rb = tool.GetComponent<Rigidbody>();
                         if (rb)
                         {
                             rb.constraints = RigidbodyConstraints.FreezeAll;
                         }
-                        pickedObject = pickup;
+                        pickedObject = tool;
 
                         //TODO - feedback for user -> vibration?
                         //controller.TriggerHapticPulse(2000);

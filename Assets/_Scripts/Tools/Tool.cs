@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Tool : MonoBehaviour {
+public class Tool : Pickup
+{
 
 	// Use this for initialization
 	void Start () {
