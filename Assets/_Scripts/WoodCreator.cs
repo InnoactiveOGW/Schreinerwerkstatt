@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class WoodCreator : MonoBehaviour {
+public class WoodCreator : Pickup {
 
     public Transform wood;
     public Vector3 position;
@@ -27,5 +27,4 @@ public class WoodCreator : MonoBehaviour {
 
         Instantiate(wood, position, Quaternion.identity);
     }
-
 }

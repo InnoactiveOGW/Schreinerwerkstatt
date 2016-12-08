@@ -153,14 +153,14 @@ public class Meshinator : MonoBehaviour
 
                 if (contact.otherCollider == collision.collider && t != null && this.canBeCloned)
 				{
+
+
                     Debug.Log("Tool hit wood");
 
                     //Impact(contact.point, collision.impactForceSum, m_ImpactShape, m_ImpactType);
 
                     // TODO
-                    Vector3 originalPosition = this.gameObject.transform.position;
-                    Vector3 originalScale = this.gameObject.transform.localScale;
-                    if(this.canBeCloned) {
+                    if (this.canBeCloned) {
                         //this.canBeCloned = false;
                         StartCoroutine(toggleCloneability());
                         Debug.Log("instance ID: " + this.gameObject.GetInstanceID() + "canBeCloned: " + canBeCloned.ToString());
@@ -171,11 +171,21 @@ public class Meshinator : MonoBehaviour
                             Debug.Log("instance ID: " + clonedMeshinator.gameObject.GetInstanceID() + "canBeCloned: " + clonedMeshinator.canBeCloned.ToString());
                         }
                     }
+
+                    Vector3 originalPosition = this.gameObject.transform.position;
+                    Vector3 originalScale = this.gameObject.transform.localScale;
                     Vector3 localContactPoint = originalPosition - contact.point;
-                    var dcc = localContactPoint.z;
+
+                    // line: AB, Point P -> project P on AB
+                    // A + dot(AP,AB) / dot(AB,AB) * AB
+                    // A ist bei uns im lokalen Koordinatensystem der Punkt (0,0,0)
+                    Vector3 ab = gameObject.transform.forward;
+                    Vector3 ap = localContactPoint;
+                    Vector3 projectedConPoint = Vector3.Dot(ap, ab) / Vector3.Dot(ab, ab) * ab;
+                    var distanceToCenter = projectedConPoint.magnitude;
                     // Math.Abs(newV3.z) / this.transform.localScale.z;
 
-                    var scaleA1 = ((originalScale.z / 2) + dcc);
+                    var scaleA1 = ((originalScale.z / 2) + distanceToCenter);
                     var scaleA2 = originalScale.z - scaleA1;
                     
                     if (scaleA1 > originalScale.z || scaleA2 > originalScale.z)
@@ -184,16 +194,16 @@ public class Meshinator : MonoBehaviour
                     Vector3 newScale1 = new Vector3(originalScale.x, originalScale.y, scaleA1);
                     Vector3 newScale2 = new Vector3(originalScale.x, originalScale.y, scaleA2);
                     this.gameObject.transform.localScale = newScale1;
-                    var posA2 = localContactPoint.z + scaleA2 / 2;
+                    var posA2 = projectedConPoint + scaleA2 * gameObject.transform.forward / 2;
                     
                     clone.transform.localScale = newScale2;
 
-                    var posA1 = scaleA1 / 2 - dcc;
-                    clone.transform.position = new Vector3(originalPosition.x, originalPosition.y, originalPosition.z - posA2);
-                    this.gameObject.transform.position = new Vector3(originalPosition.x, originalPosition.y, originalPosition.z + posA1);
-                    
-
+                    var posA1 = scaleA1 * gameObject.transform.forward / 2 - projectedConPoint;
+                    clone.transform.position = originalPosition - posA2; // new Vector3(originalPosition.x, originalPosition.y, originalPosition.z - posA2);
+                    this.gameObject.transform.position = originalPosition + posA1; //new Vector3(originalPosition.x, originalPosition.y, originalPosition.z + posA1);
                     break;
+
+
 				}
 			}
 		}

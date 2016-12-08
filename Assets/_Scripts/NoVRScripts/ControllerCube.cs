@@ -1,43 +1,62 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 
-public class ControllerInput : MonoBehaviour
-{
+public class ControllerCube : MonoBehaviour {
+
+    Color activeColor = new Color(0.5f, 0.4f, 0.4f);
+    Color inactiveColor = new Color(0.2f, 0.2f, 0.2f);
+    Color colorDelta;
+    Color targetColor;
+    bool changeColor = false;
+
+    Renderer currentRenderer;
+    Material currentMaterial;
 
     public float pickupRadius = 1f;
     Pickup pickedObject;
 
-    HapticFeedbackController hfc;
-    SteamVR_TrackedObject inputDevice;
-    SteamVR_Controller.Device controller
-    {
-        get
+    // Use this for initialization
+    void Start () {
+        currentRenderer = gameObject.GetComponent<Renderer>();
+        currentMaterial = currentRenderer.material;
+        currentMaterial.color = inactiveColor;
+    }
+	
+	// Update is called once per frame
+	void Update () {
+
+        if (Input.GetAxis("Mouse ScrollWheel") > 0)
         {
-            return SteamVR_Controller.Input((int)inputDevice.index);
+            Vector3 direction = gameObject.transform.position - gameObject.transform.parent.position;
+            //direction.y = 0;
+            gameObject.transform.position += direction * 0.1f;
         }
-    }
+        else if (Input.GetAxis("Mouse ScrollWheel") < 0) {
+            Vector3 direction = gameObject.transform.position - gameObject.transform.parent.position;
+            //direction.y = 0;
+            gameObject.transform.position -= direction * 0.1f;
+        }
 
-    void Start()
-    {
-        inputDevice = GetComponentInChildren<SteamVR_TrackedObject>();
-        hfc = GetComponentInParent<HapticFeedbackController>();
-    }
+        if(changeColor && colorDelta != null)
+        {
+            currentMaterial.color += colorDelta * 0.1f;
+            if (currentMaterial.color == targetColor) {
+                changeColor = false;
+            }
+        }
 
-    void Update()
-    {
-        if (pickedObject == null && controller.GetPressDown(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger))
+        if (pickedObject == null && Input.GetMouseButtonDown(0))
         {
             Collider[] pickups = Physics.OverlapSphere(transform.position, pickupRadius);
             if (pickups != null)
             {
                 Collider nearestCollider = null;
                 float minDis = pickupRadius;
-
                 foreach (Collider collider in pickups)
                 {
                     var currDis = Vector3.Distance(collider.transform.position, transform.position);
-                    if (currDis < minDis)
+                    Pickup pickup = collider.GetComponent<Pickup>();
+                    if (currDis < minDis && pickup != null)
                     {
                         minDis = currDis;
                         nearestCollider = collider;
@@ -47,9 +66,10 @@ public class ControllerInput : MonoBehaviour
                 if (nearestCollider)
                 {
                     WoodCreator wc = nearestCollider.GetComponent<WoodCreator>();
-                    if (wc != null) {
+                    if (wc != null)
+                    {
                         wc.createNewWood();
-                        Renderer wcRend =  wc.gameObject.GetComponent<Renderer>();
+                        Renderer wcRend = wc.gameObject.GetComponent<Renderer>();
                         Material wcMat = wcRend.material;
                         wcMat.color = new Color(Random.value, Random.value, Random.value);
                         return;
@@ -57,7 +77,8 @@ public class ControllerInput : MonoBehaviour
 
                     Tool tool = nearestCollider.GetComponent<Tool>();
                     Pickup pickup = null;
-                    if (tool == null) { 
+                    if (tool == null)
+                    {
                         pickup = nearestCollider.GetComponent<Pickup>();
                         if (pickup)
                         {
@@ -66,6 +87,7 @@ public class ControllerInput : MonoBehaviour
                             if (rb)
                             {
                                 rb.constraints = RigidbodyConstraints.FreezeAll;
+                                // rb.useGravity = false;
                             }
                             pickedObject = pickup;
                         }
@@ -73,44 +95,42 @@ public class ControllerInput : MonoBehaviour
                     else
                     {
                         tool.GetPickedUp(gameObject);
-
-                        tool.transform.rotation = controller.transform.rot;
+                        tool.transform.rotation = transform.rotation;
                         tool.transform.localPosition = new Vector3(0, 0, 0);
-                        // -> muss in das jeweilige Objekt ausgelagert werden, jedes Objekt muss selbst wissen wo sich der Ankerpunkt des Controllers befinden soll!
-
                         Rigidbody rb = tool.GetComponent<Rigidbody>();
                         if (rb)
                         {
                             rb.constraints = RigidbodyConstraints.FreezeAll;
+                            //rb.useGravity = false;
                         }
                         pickedObject = tool;
-
-                        //TODO - feedback for user -> vibration?
-                        //controller.TriggerHapticPulse(2000);
-                        
-                        // SteamVR_Controller.Input((int)inputDevice.index).TriggerHapticPulse(2000);
                     }
                 }
             }
         }
-
-        if (pickedObject != null && controller.GetPressUp(Valve.VR.EVRButtonId.k_EButton_Grip))
-        {
-            pickedObject.GetReleased(controller.velocity);
+        else if (pickedObject != null && Input.GetMouseButtonDown(1)) {
+            pickedObject.GetReleased(new Vector3(0,0,0));
             Rigidbody rb = pickedObject.GetComponent<Rigidbody>();
             if (rb)
             {
                 rb.constraints = RigidbodyConstraints.None;
             }
-
             pickedObject = null;
         }
-
     }
 
-    void hapticFeedback() {
-        // TODO: setup values for vibration
-        if (hfc)
-            hfc.StartHapticVibration(controller, 0.1f, 0.1f);
+    void OnTriggerEnter(Collider collider) {
+        Pickup p = collider.gameObject.GetComponent<Pickup>();
+        if(p != null) { 
+            colorDelta = activeColor - currentMaterial.color;
+            changeColor = true;
+            targetColor = activeColor;
+        }
+    }
+
+    void OnTriggerExit() {
+        colorDelta =  inactiveColor - currentMaterial.color;
+        changeColor = true;
+        targetColor = inactiveColor;
     }
 }
