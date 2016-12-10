@@ -8,9 +8,14 @@ public class Pickup : MonoBehaviour
         transform.SetParent(byThisObject.transform);
     }
 
-    public void GetReleased(Vector3 velocity)
+    public void GetReleased()
     {
         transform.SetParent(null);
+    }
+
+    public void GetReleased(Vector3 velocity)
+    {
+        this.GetReleased();
         GetComponent<Rigidbody>().velocity = velocity;
     }
 
