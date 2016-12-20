@@ -47,9 +47,10 @@ public class ControllerInput : MonoBehaviour
                 if (nearestCollider)
                 {
                     WoodCreator wc = nearestCollider.GetComponent<WoodCreator>();
-                    if (wc != null) {
+                    if (wc != null)
+                    {
                         wc.createNewWood();
-                        Renderer wcRend =  wc.gameObject.GetComponent<Renderer>();
+                        Renderer wcRend = wc.gameObject.GetComponent<Renderer>();
                         Material wcMat = wcRend.material;
                         wcMat.color = new Color(Random.value, Random.value, Random.value);
                         return;
@@ -57,7 +58,8 @@ public class ControllerInput : MonoBehaviour
 
                     Tool tool = nearestCollider.GetComponent<Tool>();
                     Pickup pickup = null;
-                    if (tool == null) { 
+                    if (tool == null)
+                    {
                         pickup = nearestCollider.GetComponent<Pickup>();
                         if (pickup)
                         {
@@ -87,7 +89,7 @@ public class ControllerInput : MonoBehaviour
 
                         //TODO - feedback for user -> vibration?
                         //controller.TriggerHapticPulse(2000);
-                        
+
                         // SteamVR_Controller.Input((int)inputDevice.index).TriggerHapticPulse(2000);
                     }
                 }
@@ -108,7 +110,8 @@ public class ControllerInput : MonoBehaviour
 
     }
 
-    void hapticFeedback() {
+    void hapticFeedback()
+    {
         // TODO: setup values for vibration
         if (hfc)
             hfc.StartHapticVibration(controller, 0.1f, 0.1f);
