@@ -26,6 +26,22 @@ public class ControllerInput : MonoBehaviour
 
     void Update()
     {
+        // TODO
+        // Selection highlighting
+        // replace controllers with hands -> rigidbody
+
+        /*
+              function ChangeMaterial(newMat : Material) {
+                var children : Renderer[];
+                children = GetComponentsInChildren.<Renderer>();
+                for (var rend : Renderer in children) {
+                     var mats = new Material[rend.materials.Length];
+                     for (var j = 0; j < rend.materials.Length; j++) {
+                         mats[j] = newMat; 
+                     }
+                 rend.materials = mats;
+     } 
+         */
         if (pickedObject == null && controller.GetPressDown(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger))
         {
             Collider[] pickups = Physics.OverlapSphere(transform.position, pickupRadius);
@@ -96,7 +112,8 @@ public class ControllerInput : MonoBehaviour
 
         if (pickedObject != null && controller.GetPressUp(Valve.VR.EVRButtonId.k_EButton_Grip))
         {
-            pickedObject.GetReleased(controller.velocity);
+            //pickedObject.GetReleased(controller.velocity);
+            pickedObject.GetReleased();
             Rigidbody rb = pickedObject.GetComponent<Rigidbody>();
             if (rb)
             {

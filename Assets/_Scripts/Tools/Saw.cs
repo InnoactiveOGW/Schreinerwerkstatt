@@ -6,7 +6,7 @@ public class Saw : Tool {
     bool isSawing = false;
     Divider wood = null;
     GameObject oldParent = null;
-    Rigidbody rigidbody;
+    new Rigidbody rigidbody;
     // Use this for initialization
     void Start () {
         rigidbody = gameObject.GetComponent<Rigidbody>();
@@ -60,7 +60,7 @@ public class Saw : Tool {
         foreach (ContactPoint contact in collision.contacts)
         {
             wood = collision.gameObject.GetComponent<Divider>();
-            if (contact.otherCollider == collision.collider && wood != null && wood.canBeDivided)
+            if (contact.otherCollider == collision.collider && wood != null && wood.canBeDivided && oldParent == null)
             {
                 enterSawingMode();
             }
@@ -70,16 +70,17 @@ public class Saw : Tool {
     public void OnCollisionExit(Collision collision)
     {
         if (isSawing) {
+            GetPickedUp(oldParent);
             isSawing = false;
             wood = null;
             oldParent = null;
-            GetPickedUp(oldParent);
             rigidbody.isKinematic = false;
         }
     }
 
     void enterSawingMode()
     {
+        Debug.Log("sawing mode entered");
         isSawing = true;
         rigidbody.isKinematic = true;
         oldParent = gameObject.transform.parent.gameObject;

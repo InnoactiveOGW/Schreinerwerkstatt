@@ -23,6 +23,10 @@ public class WoodDivider : Divider
                 Vector3 localContactPoint = transform.position - initialContactPoint;
 
                 // TODO
+                isValidCut = true;
+                break;
+
+                // TODO
                 Vector3 testVec1 = Vector3.Cross(localContactPoint, transform.up);
                 Vector3 testVec2 = Vector3.Cross(contact.point, transform.up);
                 float x1 = Mathf.Sign(testVec1.x); float y1 = Mathf.Sign(testVec1.y); float z1 = Mathf.Sign(testVec1.z);
@@ -69,9 +73,6 @@ public class WoodDivider : Divider
         // line: AB, Point P -> project P on AB
         // A + dot(AP,AB) / dot(AB,AB) * AB
         // A ist bei uns im lokalen Koordinatensystem der Punkt (0,0,0)
-
-        // TODO: Bugfixing:
-        // falls der kürzer Teil des Holzstücks hinten liegt, wird das Holzstück so verschoben, dass er vorne liegt -> ausbessern!
 
         Vector3 ab = gameObject.transform.forward;
         Vector3 ap = localContactPoint;

@@ -21,8 +21,8 @@ public class Hammer : MonoBehaviour {
     //}
 
 
-    void OnCollisionEnter(Collision collision) {
-        NailController nc = collision.gameObject.GetComponent < NailController >();
+    void OnTriggerEnter(Collider collider) {
+        NailController nc = collider.gameObject.GetComponent < NailController >();
         if (nc != null && nc.canBeNailed)
         {
             Rigidbody rb = nc.gameObject.GetComponent<Rigidbody>();
