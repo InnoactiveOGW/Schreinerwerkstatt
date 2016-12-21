@@ -37,7 +37,7 @@ public class PencilDraw : Pickup
                 return;
             if (tex == null)
             {
-                tex = new Texture2D(24, 480, TextureFormat.RGB24, false);
+                tex = new Texture2D(512, 1024, TextureFormat.RGB24, false);
             }
             Vector2 pixelUV = hit.textureCoord;
             pixelUV.x *= tex.width;
