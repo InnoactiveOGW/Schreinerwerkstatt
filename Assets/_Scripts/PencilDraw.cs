@@ -2,9 +2,12 @@
 using System.Collections;
 using System;
 
-public class PencilDraw : Tool
+public class PencilDraw : Pickup
 {
-    public Camera sceneCamera, canvasCam;
+
+    bool painting = false;
+    Texture2D tex;
+    Renderer paintRender;
     // Use this for initialization
     void Start()
     {
@@ -14,37 +17,57 @@ public class PencilDraw : Tool
     // Update is called once per frame
     void Update()
     {
+        if (painting && paintRender != null)
+        {
 
+            RaycastHit hit;
+            if (!Physics.Raycast(this.gameObject.transform.position,
+                -this.gameObject.transform.forward,
+                out hit,
+                float.PositiveInfinity,
+                LayerMask.GetMask("Default"),
+                QueryTriggerInteraction.Ignore))
+                return;
+
+
+
+            Renderer rend = hit.transform.GetComponent<Renderer>();
+            MeshCollider meshCollider = hit.collider as MeshCollider;
+            if (rend == null || rend.sharedMaterial == null || rend.sharedMaterial.mainTexture == null || meshCollider == null)
+                return;
+            if (tex == null)
+            {
+                tex = new Texture2D(24, 480, TextureFormat.RGB24, false);
+            }
+            Vector2 pixelUV = hit.textureCoord;
+            pixelUV.x *= tex.width;
+            pixelUV.y *= tex.height;
+
+            tex.SetPixel(Mathf.FloorToInt(pixelUV.x), Mathf.FloorToInt(pixelUV.y), Color.black);
+
+            tex.Apply();
+
+            if (paintRender != null) paintRender.material.SetTexture("_MainTex", tex);
+        }
     }
 
     public void OnTriggerEnter(Collider colider)
     {
         if (colider.gameObject.tag != "Wood") return;
-
-
-        RaycastHit hit;
-        if (!Physics.Raycast(this.gameObject.transform.position,
-            -this.gameObject.transform.forward,
-            out hit,
-            float.PositiveInfinity,
-            LayerMask.GetMask("Default"),
-            QueryTriggerInteraction.Ignore))
-            return;
-
-
-
-        Renderer rend = hit.transform.GetComponent<Renderer>();
-        MeshCollider meshCollider = hit.collider as MeshCollider;
-        if (rend == null || rend.sharedMaterial == null || rend.sharedMaterial.mainTexture == null || meshCollider == null)
-            return;
-
-        Texture2D tex = rend.material.mainTexture as Texture2D;
-        Vector2 pixelUV = hit.textureCoord;
-        pixelUV.x *= tex.width;
-        pixelUV.y *= tex.height;
-        tex.SetPixel(Mathf.FloorToInt(pixelUV.x), Mathf.FloorToInt(pixelUV.y), Color.black);
-        tex.Apply();
+        paintRender = colider.gameObject.GetComponent<Renderer>();
+        painting = true;
+        tex = paintRender.material.GetTexture("_MainTex") as Texture2D;
     }
 
+
+    public void OnTriggerExit(Collider colider)
+    {
+        if (colider.gameObject.tag != "Wood") return;
+        paintRender = colider.gameObject.GetComponent<Renderer>();
+        painting = false;
+    }
+
+    //TODO 
+    // eventuall kann man auch raycast länge als exit benutzen
 }
 
