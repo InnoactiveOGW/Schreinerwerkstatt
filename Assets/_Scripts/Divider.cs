@@ -4,6 +4,7 @@ using System.Collections;
 public class Divider : MonoBehaviour {
 
     public bool canBeDivided = true;
+    public Vector3 initialContactPoint;
 
     // Use this for initialization
     void Start () {

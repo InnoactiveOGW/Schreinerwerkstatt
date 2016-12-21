@@ -7,6 +7,8 @@ public class Saw : Tool {
     Divider wood = null;
     GameObject oldParent = null;
     new Rigidbody rigidbody;
+    public float power = 0.0005f;
+    public float movementDelay = 0.005f;
     // Use this for initialization
     void Start () {
         rigidbody = gameObject.GetComponent<Rigidbody>();
@@ -17,7 +19,7 @@ public class Saw : Tool {
     }
 	
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
         if (Input.GetKey("r") && isSawing)
         {
 
@@ -29,6 +31,23 @@ public class Saw : Tool {
 
             transform.position -= transform.forward * 0.01f;
             transform.position -= transform.up * 0.005f;
+
+        }
+
+        if (isSawing)
+        {
+            SteamVR_TrackedObject inputDevice = oldParent.GetComponent<SteamVR_TrackedObject>();
+            SteamVR_Controller.Device controller = SteamVR_Controller.Input((int)inputDevice.index);
+
+            // if (controller != null && Mathf.Abs(controller.velocity.z) > 0.3)
+            if (controller != null)
+            {
+                Vector3 normalizedVelocity = controller.velocity;
+                transform.position += transform.forward * Vector3.Dot(transform.forward, controller.velocity) * movementDelay;
+                transform.position +=  transform.up * Mathf.Abs(Vector3.Dot(transform.forward, controller.velocity)) * -power;
+                //Debug.Log("controller.velocity: " + controller.velocity.ToString());
+                //Debug.Log("normalizedVelocityy: " + normalizedVelocity.ToString());
+            }
 
         }
     }
@@ -69,11 +88,12 @@ public class Saw : Tool {
 
     public void OnCollisionExit(Collision collision)
     {
-        if (isSawing) {
-            GetPickedUp(oldParent);
+        if (isSawing && (wood.initialContactPoint.y - collision.transform.position.y) > 0.5)
+        {
+            //GetPickedUp(oldParent);
             isSawing = false;
             wood = null;
-            oldParent = null;
+            //oldParent = null;
             rigidbody.isKinematic = false;
         }
     }
@@ -85,7 +105,7 @@ public class Saw : Tool {
         rigidbody.isKinematic = true;
         oldParent = gameObject.transform.parent.gameObject;
         GetReleased();
-        gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y - 0.01f, gameObject.transform.position.z);
+        //gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y - 0.01f, gameObject.transform.position.z);
     }
 
 

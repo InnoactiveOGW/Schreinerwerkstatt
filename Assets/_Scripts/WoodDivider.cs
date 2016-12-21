@@ -6,7 +6,7 @@ public class WoodDivider : Divider
 
     GameObject clone;
     Tool tool;
-    Vector3 initialContactPoint;
+    //Vector3 initialContactPoint;
     
     // Use this for initialization
     void Start() {}
@@ -15,7 +15,7 @@ public class WoodDivider : Divider
     void Update() {}
 
     public void OnCollisionExit(Collision collision) {
-        bool isValidCut = false;
+        bool isValidCut = true;
         foreach (ContactPoint contact in collision.contacts)
         {
             if (contact.otherCollider == collision.collider)
@@ -64,8 +64,8 @@ public class WoodDivider : Divider
 
     public override void divideGameObject() {
         if (!canBeDivided)
-            return;     
-
+            return;
+        Debug.Log("divide game object");
         Vector3 originalPosition = this.gameObject.transform.position;
         Vector3 originalScale = this.gameObject.transform.localScale;
         Vector3 localContactPoint = originalPosition - initialContactPoint;
@@ -77,22 +77,28 @@ public class WoodDivider : Divider
         Vector3 ab = gameObject.transform.forward;
         Vector3 ap = localContactPoint;
         Vector3 projectedConPoint = Vector3.Dot(ap, ab) / Vector3.Dot(ab, ab) * ab;
-        float distanceToCenter = projectedConPoint.z - 0.1f;
+        float distanceToCenter = projectedConPoint.z;
 
         float scaleA1 = ((originalScale.z / 2) + distanceToCenter);
         var scaleA2 = originalScale.z - scaleA1;
 
         if (scaleA1 > originalScale.z || scaleA2 > originalScale.z)
+        {
+            Debug.Log("scaleA1: " + scaleA1 + " ,scaleA2: " + scaleA2);
+            Debug.Log("originalScale.z: " + originalScale.z + " ,originalScale.z: " + originalScale.z);
             return;
+        }
+            
 
         if (canBeDivided)
         {
+            Debug.Log("game object canBeDivided");
             toggleDivideability();
             clone = GameObject.Instantiate(this.gameObject);
             WoodDivider clonedWoodDivider = clone.GetComponent<WoodDivider>();
             if (clonedWoodDivider != null)
             {
-                toggleDivideability();
+                clonedWoodDivider.toggleDivideability();
             }
         }
         
@@ -106,7 +112,8 @@ public class WoodDivider : Divider
         Vector3 newScale2 = new Vector3(originalScale.x, originalScale.y, scaleA2);
         clone.transform.localScale = newScale2;
 
-        var posA2 = projectedConPoint + scaleA2 * gameObject.transform.forward / 2;
+        var posA2 = projectedConPoint + scaleA2 * gameObject.transform.forward / 2 * 1.05f;
         clone.transform.position = originalPosition - posA2; // new Vector3(originalPosition.x, originalPosition.y, originalPosition.z - posA2);
+        Debug.Log("game object divsion finished");
     }
 }

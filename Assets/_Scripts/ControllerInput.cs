@@ -94,6 +94,7 @@ public class ControllerInput : MonoBehaviour
 
                         tool.transform.rotation = controller.transform.rot;
                         tool.transform.localPosition = new Vector3(0, 0, 0);
+                        
                         // -> muss in das jeweilige Objekt ausgelagert werden, jedes Objekt muss selbst wissen wo sich der Ankerpunkt des Controllers befinden soll!
 
                         Rigidbody rb = tool.GetComponent<Rigidbody>();
