@@ -7,6 +7,7 @@ public class ControllerInput : MonoBehaviour
 
     public float pickupRadius = 1f;
     Pickup pickedObject;
+    GameObject highlightedObject;
 
     HapticFeedbackController hfc;
     SteamVR_TrackedObject inputDevice;
@@ -27,38 +28,61 @@ public class ControllerInput : MonoBehaviour
     void Update()
     {
         // TODO
-        // Selection highlighting
         // replace controllers with hands -> rigidbody
 
-        /*
-              function ChangeMaterial(newMat : Material) {
-                var children : Renderer[];
-                children = GetComponentsInChildren.<Renderer>();
-                for (var rend : Renderer in children) {
-                     var mats = new Material[rend.materials.Length];
-                     for (var j = 0; j < rend.materials.Length; j++) {
-                         mats[j] = newMat; 
-                     }
-                 rend.materials = mats;
-     } 
-         */
-        if (pickedObject == null && controller.GetPressDown(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger))
+        if (highlightedObject != null)
         {
-            Collider[] pickups = Physics.OverlapSphere(transform.position, pickupRadius);
-            if (pickups != null)
-            {
-                Collider nearestCollider = null;
-                float minDis = pickupRadius;
+            highlightedObject.layer = LayerMask.NameToLayer("Default");
+            highlightedObject = null;
+        }
 
-                foreach (Collider collider in pickups)
+        Collider[] pickups = Physics.OverlapSphere(transform.position, pickupRadius);
+        Collider nearestCollider = null;
+        if (pickups != null && pickups.Length > 0)
+        {
+            float minDis = pickupRadius;
+
+            foreach (Collider collider in pickups)
+            {
+                Pickup testPickup = collider.GetComponent<Pickup>();
+                if(testPickup != null) { 
+                var currDis = Vector3.Distance(collider.transform.position, transform.position);
+                if (currDis < minDis)
                 {
-                    var currDis = Vector3.Distance(collider.transform.position, transform.position);
-                    if (currDis < minDis)
-                    {
-                        minDis = currDis;
-                        nearestCollider = collider;
-                    }
+                    minDis = currDis;
+                    nearestCollider = collider;
                 }
+                }
+            }
+            if (nearestCollider != null && pickedObject == null)
+            {
+                nearestCollider.gameObject.layer = LayerMask.NameToLayer("ObjectHighlight");
+                if(highlightedObject != null && nearestCollider.gameObject.layer != highlightedObject.layer)
+                {
+                    highlightedObject.layer = LayerMask.NameToLayer("Default");
+                    highlightedObject = null;
+                }
+                highlightedObject = nearestCollider.gameObject;
+            }
+         }
+
+        if (pickedObject == null && pickups != null && pickups.Length > 0 && controller.GetPressDown(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger))
+        {
+            // Collider[] pickups = Physics.OverlapSphere(transform.position, pickupRadius);
+            //if (pickups != null)
+            //{
+            //    Collider nearestCollider = null;
+            //    float minDis = pickupRadius;
+
+            //    foreach (Collider collider in pickups)
+            //    {
+            //        var currDis = Vector3.Distance(collider.transform.position, transform.position);
+            //        if (currDis < minDis)
+            //        {
+            //            minDis = currDis;
+            //            nearestCollider = collider;
+            //        }
+            //    }
 
                 if (nearestCollider)
                 {
@@ -110,7 +134,7 @@ public class ControllerInput : MonoBehaviour
                         // SteamVR_Controller.Input((int)inputDevice.index).TriggerHapticPulse(2000);
                     }
                 }
-            }
+           // }
         }
 
         if (pickedObject != null && controller.GetPressUp(Valve.VR.EVRButtonId.k_EButton_Grip))

@@ -7,7 +7,7 @@ public class WoodMaterial : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        Texture2D texture = new Texture2D(24, 480, TextureFormat.RGB24, false);
+        Texture2D texture = new Texture2D(512, 1024, TextureFormat.RGB24, false);
 
         Color[] pix = texture.GetPixels();
         for (int i = 0; i < 128; i++)
