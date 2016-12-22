@@ -1,21 +1,25 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Saw : Tool {
+public class Saw : MonoBehaviour {
+
+    Vector3 initialContactPoint;
+    Vector3 initialContactPosition;
+    Quaternion initialRotation;
+    Vector3 initialRightVector;
+    GameObject cuttee;
+    public Material defaultCapMaterial;
+    GameObject blade;
 
     bool isSawing = false;
     Divider wood = null;
     GameObject oldParent = null;
-    new Rigidbody rigidbody;
+    //ToolUser blade;
+    //new Rigidbody rigidbody;
     public float power = 0.0005f;
     public float movementDelay = 0.005f;
     // Use this for initialization
     void Start () {
-        rigidbody = gameObject.GetComponent<Rigidbody>();
-        if (rigidbody == null)
-        {
-            throw new MissingComponentException("No rigidbody was found on the saw but there needs to be a rigidbody on the saw!");
-        }
     }
 	
 	// Update is called once per frame
@@ -34,7 +38,7 @@ public class Saw : Tool {
 
         }
 
-        if (isSawing)
+        if (isSawing && false)
         {
             SteamVR_TrackedObject inputDevice = oldParent.GetComponent<SteamVR_TrackedObject>();
             SteamVR_Controller.Device controller = SteamVR_Controller.Input((int)inputDevice.index);
@@ -48,39 +52,24 @@ public class Saw : Tool {
                 //Debug.Log("controller.velocity: " + controller.velocity.ToString());
                 //Debug.Log("normalizedVelocityy: " + normalizedVelocity.ToString());
             }
-
         }
-    }
-
-    public override void doAction(GameObject g)
-    {
-        Debug.Log("Saw object collided");
-        // var transform = g.transform;
-        // transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y, transform.localScale.z / 2);
-
-        // 1: Enter Sawing mode
-        // enterSawingMode();
-
-        // TODO 2.1: user performs sawing motion => 3.
-
-        // TODO 2.2: user can exit sawing mode => TODO: how is this performed?
-
-        // TODO 3: saw gets moved throw the wood
-
-        // 4: on collision exit => sawing is completed, wood gets cut (is done by the WoodDivider Script, doesnt need to be touched), sawing mode exit 
-
-        // TODO: modelling the user interaction with the saw while the saw is cutting the wood
-
-
     }
 
     public void OnCollisionEnter(Collision collision)
     {
+        Debug.Log("Collision detected");
         foreach (ContactPoint contact in collision.contacts)
         {
-            wood = collision.gameObject.GetComponent<Divider>();
-            if (contact.otherCollider == collision.collider && wood != null && wood.canBeDivided && oldParent == null)
+            //wood = collision.gameObject.GetComponent<Divider>();
+            if (contact.otherCollider == collision.collider && oldParent == null && collision.gameObject.tag == "Wood")
             {
+                initialContactPoint = contact.point;
+                Vector3 obpos = this.gameObject.transform.position;
+                initialContactPosition = obpos;
+                initialRotation = this.gameObject.transform.rotation;
+                initialRightVector = collision.gameObject.transform.rotation * this.gameObject.transform.right; // this.gameObject.transform.rotation * 
+                Debug.Log("initialContactPoint: " + initialContactPoint.ToString());
+                cuttee = collision.gameObject;
                 enterSawingMode();
             }
         }
@@ -88,23 +77,46 @@ public class Saw : Tool {
 
     public void OnCollisionExit(Collision collision)
     {
-        if (isSawing && (wood.initialContactPoint.y - collision.transform.position.y) > 0.5)
+        if(collision.gameObject.tag == "Wood")
+            Debug.Log("collision exit");
+        // && (initialContactPoint.y - collision.contacts[0].point.y) > 0.5
+        if (isSawing && collision.gameObject.tag == "Wood")
         {
+            Debug.Log("cutting");
             //GetPickedUp(oldParent);
+            gameObject.transform.SetParent(null);
             isSawing = false;
-            wood = null;
+            //wood = null;
             //oldParent = null;
-            rigidbody.isKinematic = false;
+
+            Material capMaterial = defaultCapMaterial;
+            // TODO
+            // welches Material wird hier verwendet?
+            Vector3 tempScale = cuttee.transform.localScale;
+            Vector3 tempPosition = cuttee.transform.position;
+            ToolUser1 tu = FindObjectOfType<ToolUser1>();
+
+            Vector3 cutterPosition = initialContactPoint - new Vector3(0, 1, 0);
+            GameObject[] pieces = tu.cut(cutterPosition, initialRotation, cuttee);
+            foreach (var p in pieces)
+            {
+                p.transform.localScale = tempScale;
+                MeshCollider mc = p.GetComponent<MeshCollider>();
+                if (mc == null)
+                    mc = p.AddComponent<MeshCollider>();
+                mc.sharedMesh = p.GetComponent<MeshFilter>().mesh;
+            }
         }
+
     }
 
     void enterSawingMode()
     {
         Debug.Log("sawing mode entered");
         isSawing = true;
-        rigidbody.isKinematic = true;
         oldParent = gameObject.transform.parent.gameObject;
-        GetReleased();
+        this.gameObject.transform.parent.SetParent(null);
+        //GetReleased();
         //gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y - 0.01f, gameObject.transform.position.z);
     }
 
