@@ -15,11 +15,15 @@ public class ControllerCube : MonoBehaviour {
     public float pickupRadius = 1f;
     Pickup pickedObject;
 
+    public Animation handAnimation;
+
     // Use this for initialization
     void Start () {
-        currentRenderer = gameObject.GetComponent<Renderer>();
+        currentRenderer = gameObject.GetComponentInChildren<Renderer>();
         currentMaterial = currentRenderer.material;
         currentMaterial.color = inactiveColor;
+
+        //handAnimation = gameObject.GetComponent<Animation>();
     }
 	
 	// Update is called once per frame
@@ -47,6 +51,8 @@ public class ControllerCube : MonoBehaviour {
 
         if (pickedObject == null && Input.GetMouseButtonDown(0))
         {
+            handAnimation.CrossFade("GrabEmpty");
+            
             Collider[] pickups = Physics.OverlapSphere(transform.position, pickupRadius);
             if (pickups != null)
             {
@@ -107,6 +113,7 @@ public class ControllerCube : MonoBehaviour {
                     }
                 }
             }
+            handAnimation.CrossFadeQueued("ReverseGrabEmpty");
         }
         else if (pickedObject != null && Input.GetMouseButtonDown(1)) {
             pickedObject.GetReleased(new Vector3(0,0,0));
@@ -116,6 +123,7 @@ public class ControllerCube : MonoBehaviour {
                 rb.constraints = RigidbodyConstraints.None;
             }
             pickedObject = null;
+            handAnimation.CrossFadeQueued("ReverseGrabEmpty");
         }
     }
 
@@ -125,6 +133,7 @@ public class ControllerCube : MonoBehaviour {
             colorDelta = activeColor - currentMaterial.color;
             changeColor = true;
             targetColor = activeColor;
+            handAnimation.CrossFade("Point");
         }
     }
 
@@ -132,5 +141,6 @@ public class ControllerCube : MonoBehaviour {
         colorDelta =  inactiveColor - currentMaterial.color;
         changeColor = true;
         targetColor = inactiveColor;
+        handAnimation.CrossFade("ReversePoint");
     }
 }

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class WoodMaterial : MonoBehaviour
 {
@@ -13,6 +14,10 @@ public class WoodMaterial : MonoBehaviour
 
         if (texture == null)
         {
+            try
+            {
+
+            
             texture = new Texture2D(512, 1024, TextureFormat.RGB24, false);
             Color[] pix = texture.GetPixels();
             for (int i = 0; i < 128; i++)
@@ -21,9 +26,20 @@ public class WoodMaterial : MonoBehaviour
                     texture.SetPixel(i, j, Color.magenta);
             }
             texture.Apply();
+            }
+            catch(UnityException ex)
+            {
+                Debug.Log("Unable to read from texture: " + ex.Message);
+            }
         }
         else {
-            texture = Instantiate(texture) as Texture2D;
+            try { 
+                texture = Instantiate(texture) as Texture2D;
+            }
+            catch (UnityException ex)
+            {
+                Debug.Log("Unable to read from texture: " + ex.Message);
+            }
         }
         GetComponent<Renderer>().material.SetTexture("_MainTex", texture);
         // EDITED:
