@@ -5,11 +5,31 @@ public class Pickup : MonoBehaviour
 {
     public void GetPickedUp(GameObject byThisObject)
     {
-        transform.SetParent(byThisObject.transform);
+        Transform tempParent = this.gameObject.transform;
+        tempParent.SetParent(byThisObject.transform);
+    }
+
+    public void GetPickedUp(GameObject byThisObject, out Pickup parent)
+    {
+
+        // Transform nextParent = this.gameObject.transform.parent;
+        Transform tempParent = this.gameObject.transform;
+        if (gameObject.tag == "Wood")
+            while (tempParent.parent != null)
+            {
+                tempParent = tempParent.parent;
+            }
+
+        Pickup pu = tempParent.GetComponent<Pickup>();
+        parent = pu;
+        tempParent.SetParent(byThisObject.transform);
     }
 
     public void GetReleased()
     {
+        ControllerCube cc = GetComponentInParent<ControllerCube>();
+        if (cc != null && cc.pickedObject == this)
+            cc.pickedObject = null;
         transform.SetParent(null);
     }
 

@@ -61,12 +61,36 @@ public class Saw : MonoBehaviour {
 
     public void OnCollisionEnter(Collision collision)
     {
+        // TODO: Bewertung: Berechnung wie weit der Kollisionspunkt vom gewünschten entfernt ist
+        // -> TODO: Berechnung
+
+        /* TODO: Wo liegt der gewünschte Schnittpunkt?
+         * -> center = 0,0,0 & scale = 1,1,1 =>
+         *  -> p = x,y,z
+         *  -> p auf Linie (center, forwardVec) projezieren
+         *  => p.z = Entfernung zum Mittelpunkt
+         *  => scaleA = 0.33, scaleB = 0.33, scaleC = 0.33
+         *  => s.z = scaleA / 2 || -scaleA / 2
+         *  
+         *  nächster Schnitt:
+         *  s.z = 0
+         */
+        /*
+            Vector3 ab = gameObject.transform.forward;
+            Vector3 ap = localContactPoint;
+            Vector3 projectedConPoint = Vector3.Dot(ap, ab) / Vector3.Dot(ab, ab) * ab;
+            float distanceToCenter = projectedConPoint.z; 
+
+        */
         Debug.Log("Collision detected");
         foreach (ContactPoint contact in collision.contacts)
         {
             //wood = collision.gameObject.GetComponent<Divider>();
             if (contact.otherCollider == collision.collider && oldParent == null && collision.gameObject.tag == "Wood")
             {
+                ControllerCube cc = gameObject.transform.parent.GetComponentInParent<ControllerCube>();
+                if (cc == null)
+                    return;
                 initialContactPoint = contact.point;
                 Vector3 obpos = this.gameObject.transform.position;
                 initialContactPosition = obpos;
@@ -105,15 +129,25 @@ public class Saw : MonoBehaviour {
             {
                 p.tag = preCutTag;
                 p.transform.localScale = tempScale;
-                MeshCollider mc = p.GetComponent<MeshCollider>();
-                if (mc == null) {
-                    mc = p.AddComponent<MeshCollider>();
-                    mc.convex = true;
+
+                MeshCollider[] mcs = p.GetComponents<MeshCollider>();
+                foreach(MeshCollider mc in mcs)
+                {
+                    MeshFilter meshfilter = mc.GetComponent<MeshFilter>();
+                    Mesh mesh = meshfilter.mesh;
+                    mc.sharedMesh = mesh;
                 }
-                mc.sharedMesh = p.GetComponent<MeshFilter>().mesh;
-                MeshCollider triggerMeshCollider = p.AddComponent<MeshCollider>();
-                triggerMeshCollider.convex = true;
-                triggerMeshCollider.isTrigger = true;
+                if (mcs.Length == 0)
+                {
+                    MeshCollider newMC = p.AddComponent<MeshCollider>();
+                    newMC.convex = true;
+                    newMC.sharedMesh = p.GetComponent<MeshFilter>().mesh;
+
+                    MeshCollider triggerMeshCollider = p.AddComponent<MeshCollider>();
+                    triggerMeshCollider.convex = true;
+                    triggerMeshCollider.isTrigger = true;
+                }
+
                 Rigidbody rb = p.GetComponent<Rigidbody>();
                 if(rb == null)
                     p.AddComponent<Rigidbody>();
@@ -141,7 +175,8 @@ public class Saw : MonoBehaviour {
         Pickup pu = parentTransform.gameObject.GetComponent<Pickup>();
         if(pu != null)
         {
-            pu.GetReleased();
+            pu.gameObject.transform.parent = null;
+            // pu.GetReleased();
         }
         Debug.Log("sawing mode entered");
     }

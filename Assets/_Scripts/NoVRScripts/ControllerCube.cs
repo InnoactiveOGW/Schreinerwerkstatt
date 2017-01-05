@@ -13,7 +13,7 @@ public class ControllerCube : MonoBehaviour {
     Material currentMaterial;
 
     public float pickupRadius = 1f;
-    Pickup pickedObject;
+    public Pickup pickedObject;
 
     public Animation handAnimation;
     public Pickup selectedObject;
@@ -54,14 +54,20 @@ public class ControllerCube : MonoBehaviour {
         {
             if(selectedObject != null)
             {
-                selectedObject.GetPickedUp(gameObject);
-                Rigidbody rb = selectedObject.GetComponent<Rigidbody>();
+                selectedObject.GetPickedUp(gameObject, out pickedObject);
+                Rigidbody rb = pickedObject.GetComponent<Rigidbody>();
                 if (rb)
                 {
                     rb.constraints = RigidbodyConstraints.FreezeAll;
                     // rb.useGravity = false;
                 }
-                pickedObject = selectedObject;
+                if(selectedObject.tag == "Tool")
+                {
+                    pickedObject.transform.position = this.gameObject.transform.position;
+                    pickedObject.transform.rotation = this.gameObject.transform.rotation;
+                }
+
+                // pickedObject = selectedObject;
                 return;
             }
 
@@ -130,12 +136,13 @@ public class ControllerCube : MonoBehaviour {
             handAnimation.CrossFadeQueued("ReverseGrabEmpty");
         }
         else if (pickedObject != null && Input.GetMouseButtonDown(1)) {
-            pickedObject.GetReleased(new Vector3(0,0,0));
+            
             Rigidbody rb = pickedObject.GetComponent<Rigidbody>();
             if (rb)
             {
                 rb.constraints = RigidbodyConstraints.None;
             }
+            pickedObject.GetReleased(new Vector3(0, 0, 0));
             pickedObject = null;
             handAnimation.CrossFadeQueued("ReverseGrabEmpty");
         }
