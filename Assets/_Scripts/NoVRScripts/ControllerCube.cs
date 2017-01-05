@@ -16,6 +16,7 @@ public class ControllerCube : MonoBehaviour {
     Pickup pickedObject;
 
     public Animation handAnimation;
+    public Pickup selectedObject;
 
     // Use this for initialization
     void Start () {
@@ -51,6 +52,19 @@ public class ControllerCube : MonoBehaviour {
 
         if (pickedObject == null && Input.GetMouseButtonDown(0))
         {
+            if(selectedObject != null)
+            {
+                selectedObject.GetPickedUp(gameObject);
+                Rigidbody rb = selectedObject.GetComponent<Rigidbody>();
+                if (rb)
+                {
+                    rb.constraints = RigidbodyConstraints.FreezeAll;
+                    // rb.useGravity = false;
+                }
+                pickedObject = selectedObject;
+                return;
+            }
+
             handAnimation.CrossFade("GrabEmpty");
             
             Collider[] pickups = Physics.OverlapSphere(transform.position, pickupRadius);
@@ -134,6 +148,7 @@ public class ControllerCube : MonoBehaviour {
             changeColor = true;
             targetColor = activeColor;
             handAnimation.CrossFade("Point");
+            selectedObject = p;
         }
     }
 
@@ -142,5 +157,6 @@ public class ControllerCube : MonoBehaviour {
         changeColor = true;
         targetColor = inactiveColor;
         handAnimation.CrossFade("ReversePoint");
+        selectedObject = null;
     }
 }

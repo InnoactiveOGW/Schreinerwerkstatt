@@ -18,23 +18,27 @@ public class Saw : MonoBehaviour {
     //new Rigidbody rigidbody;
     public float power = 0.0005f;
     public float movementDelay = 0.005f;
+
+    public Transform parentTransform;
+
     // Use this for initialization
     void Start () {
+        parentTransform = gameObject.transform.parent.transform;
     }
 	
 	// Update is called once per frame
 	void FixedUpdate () {
+        Transform t = gameObject.transform.parent.transform;
         if (Input.GetKey("r") && isSawing)
         {
-
-            transform.position += transform.forward * 0.01f;
+            t.position += transform.forward * 0.01f;
 
         }
         else if (Input.GetKey("f") && isSawing)
         {
 
-            transform.position -= transform.forward * 0.01f;
-            transform.position -= transform.up * 0.005f;
+            t.position -= transform.forward * 0.01f;
+            t.position -= transform.up * 0.005f;
 
         }
 
@@ -83,12 +87,10 @@ public class Saw : MonoBehaviour {
         if (isSawing && collision.gameObject.tag == "Wood")
         {
             Debug.Log("cutting");
-            //GetPickedUp(oldParent);
-            gameObject.transform.SetParent(null);
+            // gameObject.transform.SetParent(oldParent.transform);
             isSawing = false;
             //wood = null;
-            //oldParent = null;
-
+            
             Material capMaterial = defaultCapMaterial;
             // TODO
             // welches Material wird hier verwendet?
@@ -96,28 +98,52 @@ public class Saw : MonoBehaviour {
             Vector3 tempPosition = cuttee.transform.position;
             ToolUser1 tu = FindObjectOfType<ToolUser1>();
 
+            string preCutTag = cuttee.tag;
             Vector3 cutterPosition = initialContactPoint - new Vector3(0, 1, 0);
             GameObject[] pieces = tu.cut(cutterPosition, initialRotation, cuttee);
             foreach (var p in pieces)
             {
+                p.tag = preCutTag;
                 p.transform.localScale = tempScale;
                 MeshCollider mc = p.GetComponent<MeshCollider>();
-                if (mc == null)
+                if (mc == null) {
                     mc = p.AddComponent<MeshCollider>();
+                    mc.convex = true;
+                }
                 mc.sharedMesh = p.GetComponent<MeshFilter>().mesh;
+                MeshCollider triggerMeshCollider = p.AddComponent<MeshCollider>();
+                triggerMeshCollider.convex = true;
+                triggerMeshCollider.isTrigger = true;
+                Rigidbody rb = p.GetComponent<Rigidbody>();
+                if(rb == null)
+                    p.AddComponent<Rigidbody>();
+                Pickup pickup = p.GetComponent<Pickup>();
+                if (pickup == null)
+                    p.AddComponent<Pickup>();
             }
+
+            Pickup pu = parentTransform.gameObject.GetComponent<Pickup>();
+            if(pu != null)
+            {
+                pu.GetPickedUp(oldParent);
+                pu.gameObject.transform.position = oldParent.transform.position;
+                pu.gameObject.transform.rotation = oldParent.transform.rotation;
+            }
+            oldParent = null;
         }
 
     }
 
     void enterSawingMode()
     {
-        Debug.Log("sawing mode entered");
         isSawing = true;
-        oldParent = gameObject.transform.parent.gameObject;
-        this.gameObject.transform.parent.SetParent(null);
-        //GetReleased();
-        //gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y - 0.01f, gameObject.transform.position.z);
+        oldParent = parentTransform.parent.gameObject;
+        Pickup pu = parentTransform.gameObject.GetComponent<Pickup>();
+        if(pu != null)
+        {
+            pu.GetReleased();
+        }
+        Debug.Log("sawing mode entered");
     }
 
 
