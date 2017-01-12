@@ -5,20 +5,21 @@ using System;
 public class Measure : Tool
 {
     GameObject myLine;
-    public float sizeFactor = 1;
+
     Vector3 startPoint;
     TextMesh valueText;
     // Use this for initialization
     void Start()
     {
         valueText = this.GetComponentInChildren<TextMesh>();
+        isPickedup = false;
     }
 
     // Update is called once per frame
     void Update()
     {
 
-        if (Input.GetKey("m"))
+        if (Input.GetKey("g") && isPickedup)
         {
 
             if (myLine == null)
@@ -49,7 +50,9 @@ public class Measure : Tool
 
     private string calculateDistance(Vector3 startPoint, Vector3 endpoint)
     {
-        return ((startPoint - endpoint).magnitude).ToString();
+        Debug.Log(Config.sizeFactor);
+        return (((startPoint - endpoint).magnitude) * Config.sizeFactor).ToString();
+
     }
 
     void DrawLine(Vector3 end)

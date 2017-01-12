@@ -3,11 +3,14 @@ using System.Collections;
 
 public class Pickup : Interactable
 {
+    public bool isPickedup;
+
 
     public void GetPickedUp(GameObject byThisObject)
     {
         Transform tempParent = this.gameObject.transform;
         tempParent.SetParent(byThisObject.transform);
+        isPickedup = true;
     }
 
     public void GetPickedUp(GameObject byThisObject, out Pickup parent)
@@ -24,6 +27,7 @@ public class Pickup : Interactable
         Pickup pu = tempParent.GetComponent<Pickup>();
         parent = pu;
         tempParent.SetParent(byThisObject.transform);
+        isPickedup = true;
     }
 
     public void GetReleased()
@@ -32,12 +36,14 @@ public class Pickup : Interactable
         if (cc != null && cc.pickedObject == this)
             cc.pickedObject = null;
         transform.SetParent(null);
+        isPickedup = false;
     }
 
     public void GetReleased(Vector3 velocity)
     {
         this.GetReleased();
         GetComponent<Rigidbody>().velocity = velocity;
+        isPickedup = false;
     }
 
     public virtual void doAction(GameObject g)
