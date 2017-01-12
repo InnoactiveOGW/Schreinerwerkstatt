@@ -20,5 +20,11 @@ public class Glue : Pickup
                 wait = Time.time;
             }
         }
+
+        if (Input.GetKey("g") && Time.time - wait > 1)
+        {
+            GameObject thisglue = (GameObject)Instantiate(glue, this.transform.position + this.transform.forward * (float)0.2, Quaternion.identity);
+            wait = Time.time;
+        }
     }
 }

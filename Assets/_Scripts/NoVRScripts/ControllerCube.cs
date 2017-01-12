@@ -13,9 +13,10 @@ public class ControllerCube : MonoBehaviour {
     Material currentMaterial;
 
     public float pickupRadius = 1f;
-    Pickup pickedObject;
+    public Pickup pickedObject;
 
     public Animation handAnimation;
+    public Interactable selectedObject;
 
     // Use this for initialization
     void Start () {
@@ -51,6 +52,31 @@ public class ControllerCube : MonoBehaviour {
 
         if (pickedObject == null && Input.GetMouseButtonDown(0))
         {
+            if(selectedObject != null)
+            {
+                if (selectedObject is Pickup) {
+                    (selectedObject as Pickup).GetPickedUp(gameObject, out pickedObject);
+                    Rigidbody rb = pickedObject.GetComponent<Rigidbody>();
+                    if (rb)
+                    {
+                        rb.constraints = RigidbodyConstraints.FreezeAll;
+                        // rb.useGravity = false;
+                    }
+                    if(selectedObject.tag == "Tool")
+                    {
+                        pickedObject.transform.position = this.gameObject.transform.position;
+                        pickedObject.transform.rotation = this.gameObject.transform.rotation;
+                    }
+                } else
+                {
+                    selectedObject.interact(this.gameObject);
+                }
+
+
+                // pickedObject = selectedObject;
+                return;
+            }
+
             handAnimation.CrossFade("GrabEmpty");
             
             Collider[] pickups = Physics.OverlapSphere(transform.position, pickupRadius);
@@ -116,24 +142,26 @@ public class ControllerCube : MonoBehaviour {
             handAnimation.CrossFadeQueued("ReverseGrabEmpty");
         }
         else if (pickedObject != null && Input.GetMouseButtonDown(1)) {
-            pickedObject.GetReleased(new Vector3(0,0,0));
+            
             Rigidbody rb = pickedObject.GetComponent<Rigidbody>();
             if (rb)
             {
                 rb.constraints = RigidbodyConstraints.None;
             }
+            pickedObject.GetReleased(new Vector3(0, 0, 0));
             pickedObject = null;
             handAnimation.CrossFadeQueued("ReverseGrabEmpty");
         }
     }
 
     void OnTriggerEnter(Collider collider) {
-        Pickup p = collider.gameObject.GetComponent<Pickup>();
+        Interactable p = collider.gameObject.GetComponent<Interactable>();
         if(p != null) { 
             colorDelta = activeColor - currentMaterial.color;
             changeColor = true;
             targetColor = activeColor;
             handAnimation.CrossFade("Point");
+            selectedObject = p;
         }
     }
 
@@ -142,5 +170,6 @@ public class ControllerCube : MonoBehaviour {
         changeColor = true;
         targetColor = inactiveColor;
         handAnimation.CrossFade("ReversePoint");
+        selectedObject = null;
     }
 }

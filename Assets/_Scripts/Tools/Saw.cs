@@ -18,23 +18,27 @@ public class Saw : MonoBehaviour {
     //new Rigidbody rigidbody;
     public float power = 0.0005f;
     public float movementDelay = 0.005f;
+
+    public Transform parentTransform;
+
     // Use this for initialization
     void Start () {
+        parentTransform = gameObject.transform.parent.transform;
     }
 	
 	// Update is called once per frame
 	void FixedUpdate () {
+        Transform t = gameObject.transform.parent.transform;
         if (Input.GetKey("r") && isSawing)
         {
-
-            transform.position += transform.forward * 0.01f;
+            t.position += transform.forward * 0.01f;
 
         }
         else if (Input.GetKey("f") && isSawing)
         {
 
-            transform.position -= transform.forward * 0.01f;
-            transform.position -= transform.up * 0.005f;
+            t.position -= transform.forward * 0.01f;
+            t.position -= transform.up * 0.005f;
 
         }
 
@@ -57,12 +61,36 @@ public class Saw : MonoBehaviour {
 
     public void OnCollisionEnter(Collision collision)
     {
+        // TODO: Bewertung: Berechnung wie weit der Kollisionspunkt vom gewünschten entfernt ist
+        // -> TODO: Berechnung
+
+        /* TODO: Wo liegt der gewünschte Schnittpunkt?
+         * -> center = 0,0,0 & scale = 1,1,1 =>
+         *  -> p = x,y,z
+         *  -> p auf Linie (center, forwardVec) projezieren
+         *  => p.z = Entfernung zum Mittelpunkt
+         *  => scaleA = 0.33, scaleB = 0.33, scaleC = 0.33
+         *  => s.z = scaleA / 2 || -scaleA / 2
+         *  
+         *  nächster Schnitt:
+         *  s.z = 0
+         */
+        /*
+            Vector3 ab = gameObject.transform.forward;
+            Vector3 ap = localContactPoint;
+            Vector3 projectedConPoint = Vector3.Dot(ap, ab) / Vector3.Dot(ab, ab) * ab;
+            float distanceToCenter = projectedConPoint.z; 
+
+        */
         Debug.Log("Collision detected");
         foreach (ContactPoint contact in collision.contacts)
         {
             //wood = collision.gameObject.GetComponent<Divider>();
             if (contact.otherCollider == collision.collider && oldParent == null && collision.gameObject.tag == "Wood")
             {
+                ControllerCube cc = gameObject.transform.parent.GetComponentInParent<ControllerCube>();
+                if (cc == null)
+                    return;
                 initialContactPoint = contact.point;
                 Vector3 obpos = this.gameObject.transform.position;
                 initialContactPosition = obpos;
@@ -83,12 +111,10 @@ public class Saw : MonoBehaviour {
         if (isSawing && collision.gameObject.tag == "Wood")
         {
             Debug.Log("cutting");
-            //GetPickedUp(oldParent);
-            gameObject.transform.SetParent(null);
+            // gameObject.transform.SetParent(oldParent.transform);
             isSawing = false;
             //wood = null;
-            //oldParent = null;
-
+            
             Material capMaterial = defaultCapMaterial;
             // TODO
             // welches Material wird hier verwendet?
@@ -96,28 +122,63 @@ public class Saw : MonoBehaviour {
             Vector3 tempPosition = cuttee.transform.position;
             ToolUser1 tu = FindObjectOfType<ToolUser1>();
 
+            string preCutTag = cuttee.tag;
             Vector3 cutterPosition = initialContactPoint - new Vector3(0, 1, 0);
             GameObject[] pieces = tu.cut(cutterPosition, initialRotation, cuttee);
             foreach (var p in pieces)
             {
+                p.tag = preCutTag;
                 p.transform.localScale = tempScale;
-                MeshCollider mc = p.GetComponent<MeshCollider>();
-                if (mc == null)
-                    mc = p.AddComponent<MeshCollider>();
-                mc.sharedMesh = p.GetComponent<MeshFilter>().mesh;
+
+                MeshCollider[] mcs = p.GetComponents<MeshCollider>();
+                foreach(MeshCollider mc in mcs)
+                {
+                    MeshFilter meshfilter = mc.GetComponent<MeshFilter>();
+                    Mesh mesh = meshfilter.mesh;
+                    mc.sharedMesh = mesh;
+                }
+                if (mcs.Length == 0)
+                {
+                    MeshCollider newMC = p.AddComponent<MeshCollider>();
+                    newMC.convex = true;
+                    newMC.sharedMesh = p.GetComponent<MeshFilter>().mesh;
+
+                    MeshCollider triggerMeshCollider = p.AddComponent<MeshCollider>();
+                    triggerMeshCollider.convex = true;
+                    triggerMeshCollider.isTrigger = true;
+                }
+
+                Rigidbody rb = p.GetComponent<Rigidbody>();
+                if(rb == null)
+                    p.AddComponent<Rigidbody>();
+                Pickup pickup = p.GetComponent<Pickup>();
+                if (pickup == null)
+                    p.AddComponent<Pickup>();
             }
+
+            Pickup pu = parentTransform.gameObject.GetComponent<Pickup>();
+            if(pu != null)
+            {
+                pu.GetPickedUp(oldParent);
+                pu.gameObject.transform.position = oldParent.transform.position;
+                pu.gameObject.transform.rotation = oldParent.transform.rotation;
+            }
+            oldParent = null;
         }
 
     }
 
     void enterSawingMode()
     {
-        Debug.Log("sawing mode entered");
         isSawing = true;
-        oldParent = gameObject.transform.parent.gameObject;
-        this.gameObject.transform.parent.SetParent(null);
-        //GetReleased();
-        //gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y - 0.01f, gameObject.transform.position.z);
+        oldParent = parentTransform.parent.gameObject;
+        Pickup pu = parentTransform.gameObject.GetComponent<Pickup>();
+        if(pu != null)
+        {
+            pu.gameObject.transform.parent = null;
+            // pu.GetReleased();
+        }
+        Debug.Log("sawing mode entered");
     }
 
 
