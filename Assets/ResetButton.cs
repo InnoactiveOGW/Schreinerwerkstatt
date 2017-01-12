@@ -16,6 +16,8 @@ public class ResetButton : Interactable {
     public override void interact(GameObject interactionGO)
     {
         GameController gc = FindObjectOfType<GameController>();
-        gc.getCurrentLevel().resetLevel();
+        LevelCtrl lc = gc.getCurrentLevel();
+        if(lc != null)
+            lc.resetLevel();
     }
 }

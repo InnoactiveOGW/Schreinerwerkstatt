@@ -31,4 +31,11 @@ public class LevelCtrl : MonoBehaviour {
 
 
     }
+
+    public virtual float evaluateConstruction(GameObject go)
+    {
+        // -1 indicates that the evaluation couldn't be completed
+        return -1;
+    }
+
 }

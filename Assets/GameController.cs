@@ -24,4 +24,13 @@ public class GameController : MonoBehaviour {
     {
         return currentLevel;
     }
+
+    public void finishLevel(GameObject finishedObject)
+    {
+        float score = currentLevel.evaluateConstruction(finishedObject);
+
+        Debug.Log(score);
+
+        // evaluateConstruction
+    }
 }
