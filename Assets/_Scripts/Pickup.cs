@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Pickup : MonoBehaviour
+public class Pickup : Interactable
 {
+
     public void GetPickedUp(GameObject byThisObject)
     {
         Transform tempParent = this.gameObject.transform;

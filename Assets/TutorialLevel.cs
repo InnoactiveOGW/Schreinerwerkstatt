@@ -2,9 +2,10 @@
 using System.Collections;
 using System;
 
-public class TutorialLevel : MonoBehaviour {
+public class TutorialLevel : LevelCtrl{
 
     public bool spawnLvl = true;
+    public GameObject blueprintParent;
     public GameObject blueprint;
     public GameObject[] materials;
     Vector3 originalPosition;
@@ -21,7 +22,7 @@ public class TutorialLevel : MonoBehaviour {
     {
         if(collider.gameObject.tag == "Workspace" && spawnLvl)
         {
-            spawnLevel1();
+            startLevel();
             Pickup pu = GetComponent<Pickup>();
             if(pu != null)
             {
@@ -32,7 +33,7 @@ public class TutorialLevel : MonoBehaviour {
             this.gameObject.transform.rotation = orginalRotation;
         }
     }
-
+    
     private void spawnLevel1()
     {
         spawnLvl = false;
@@ -42,7 +43,8 @@ public class TutorialLevel : MonoBehaviour {
 
     void spawnBlueprint()
     {
-        Instantiate(blueprint);
+        GameObject bp = Instantiate(blueprint);
+        bp.transform.SetParent(blueprintParent.transform);
     }
 
     private void spawnMaterials()
@@ -53,10 +55,23 @@ public class TutorialLevel : MonoBehaviour {
         }
     }
 
-    public void restartLevel()
+    public override void startLevel()
     {
+        base.startLevel();
+        spawnLevel1();
+    }
+
+    public override void resetLevel()
+    {
+        base.resetLevel();
         cleanupLevel1();
         spawnLevel1();
+    }
+
+    public override void endLevel()
+    {
+        base.endLevel();
+        cleanupLevel1();
     }
 
     private void cleanupLevel1()

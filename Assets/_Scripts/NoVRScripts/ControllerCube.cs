@@ -16,7 +16,7 @@ public class ControllerCube : MonoBehaviour {
     public Pickup pickedObject;
 
     public Animation handAnimation;
-    public Pickup selectedObject;
+    public Interactable selectedObject;
 
     // Use this for initialization
     void Start () {
@@ -54,18 +54,24 @@ public class ControllerCube : MonoBehaviour {
         {
             if(selectedObject != null)
             {
-                selectedObject.GetPickedUp(gameObject, out pickedObject);
-                Rigidbody rb = pickedObject.GetComponent<Rigidbody>();
-                if (rb)
+                if (selectedObject is Pickup) {
+                    (selectedObject as Pickup).GetPickedUp(gameObject, out pickedObject);
+                    Rigidbody rb = pickedObject.GetComponent<Rigidbody>();
+                    if (rb)
+                    {
+                        rb.constraints = RigidbodyConstraints.FreezeAll;
+                        // rb.useGravity = false;
+                    }
+                    if(selectedObject.tag == "Tool")
+                    {
+                        pickedObject.transform.position = this.gameObject.transform.position;
+                        pickedObject.transform.rotation = this.gameObject.transform.rotation;
+                    }
+                } else
                 {
-                    rb.constraints = RigidbodyConstraints.FreezeAll;
-                    // rb.useGravity = false;
+                    selectedObject.interact(this.gameObject);
                 }
-                if(selectedObject.tag == "Tool")
-                {
-                    pickedObject.transform.position = this.gameObject.transform.position;
-                    pickedObject.transform.rotation = this.gameObject.transform.rotation;
-                }
+
 
                 // pickedObject = selectedObject;
                 return;
@@ -149,7 +155,7 @@ public class ControllerCube : MonoBehaviour {
     }
 
     void OnTriggerEnter(Collider collider) {
-        Pickup p = collider.gameObject.GetComponent<Pickup>();
+        Interactable p = collider.gameObject.GetComponent<Interactable>();
         if(p != null) { 
             colorDelta = activeColor - currentMaterial.color;
             changeColor = true;
