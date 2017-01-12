@@ -11,7 +11,8 @@ public class Glue : Pickup
     {
 
         SteamVR_TrackedObject inputDevice = this.gameObject.GetComponentInParent<SteamVR_TrackedObject>();
-        if(inputDevice != null) { 
+        if (inputDevice != null)
+        {
             SteamVR_Controller.Device controller = SteamVR_Controller.Input((int)inputDevice.index);
             if (controller.GetPressDown(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger) && Time.time - wait > 1)
             {
