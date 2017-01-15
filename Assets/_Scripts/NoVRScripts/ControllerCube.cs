@@ -22,8 +22,10 @@ public class ControllerCube : MonoBehaviour {
 	SteamVR_Controller.Device controller
 	{
 		get
-		{
-			return SteamVR_Controller.Input((int)inputDevice.index);
+		{   if (inputDevice != null)
+                return SteamVR_Controller.Input((int)inputDevice.index);
+            else
+                return null;
 		}
 	}
 
@@ -43,8 +45,12 @@ public class ControllerCube : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		var triggerButton = controller.GetPressDown (Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger);
-		var gripButton = controller.GetPressUp (Valve.VR.EVRButtonId.k_EButton_Grip);
+        var triggerButton = false;
+        var gripButton = false;
+        if (false) { 
+		    triggerButton = controller.GetPressDown (Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger);
+		    gripButton = controller.GetPressUp (Valve.VR.EVRButtonId.k_EButton_Grip);
+        }
 
         if (Input.GetAxis("Mouse ScrollWheel") > 0)
         {
@@ -66,7 +72,7 @@ public class ControllerCube : MonoBehaviour {
             }
         }
 
-		if (pickedObject == null && (triggerButton|| Input.GetMouseButtonDown(0)))
+		if (pickedObject == null && (triggerButton || Input.GetMouseButtonDown(0)))
         {
             if(selectedObject != null)
             {

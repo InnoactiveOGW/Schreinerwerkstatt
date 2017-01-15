@@ -29,8 +29,8 @@ public class PencilDraw : Pickup
                 QueryTriggerInteraction.Ignore))
                 return;
 
-			Debug.Log ("HiT: " + hit.point.ToString ());
-
+			Debug.Log ("Hit: " + hit.point.ToString ());
+            Debug.Log("Hit object: " + hit.collider.gameObject.tag);
 
             Renderer rend = hit.transform.GetComponent<Renderer>();
             MeshCollider meshCollider = hit.collider as MeshCollider;
