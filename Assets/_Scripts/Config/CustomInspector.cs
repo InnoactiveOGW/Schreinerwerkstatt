@@ -25,6 +25,7 @@ public class CustomInspector : Editor
         {
             GameConfig getterSetter = (GameConfig)target;
             getterSetter.measureSizeFactor = getterSetter.measureSizeFactor_;
+			getterSetter.isVR = getterSetter.isVR_;
         }
 
     }

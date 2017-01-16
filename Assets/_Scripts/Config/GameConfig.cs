@@ -15,10 +15,24 @@ public class GameConfig : MonoBehaviour
         }
         set
         {
-            Debug.Log("Setter!");
             Config.sizeFactor = value;
         }
     }
+
+	public bool isVR_;
+
+	// public property of the variable
+	public bool isVR
+	{
+		get
+		{
+			return Config.isVR;
+		}
+		set
+		{
+			Config.isVR = value;
+		}
+	}
 
     //add here 
 }

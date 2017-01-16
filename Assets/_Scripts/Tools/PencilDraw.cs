@@ -25,11 +25,12 @@ public class PencilDraw : Pickup
                 -this.gameObject.transform.forward,
                 out hit,
                 float.PositiveInfinity,
-                LayerMask.GetMask("Default"),
+                LayerMask.GetMask("WoodLayer"),
                 QueryTriggerInteraction.Ignore))
                 return;
 
-
+			Debug.Log ("Hit: " + hit.point.ToString ());
+            Debug.Log("Hit object: " + hit.collider.gameObject.tag);
 
             Renderer rend = hit.transform.GetComponent<Renderer>();
             MeshCollider meshCollider = hit.collider as MeshCollider;
@@ -42,6 +43,9 @@ public class PencilDraw : Pickup
             Vector2 pixelUV = hit.textureCoord;
             pixelUV.x *= tex.width;
             pixelUV.y *= tex.height;
+
+			Debug.Log ("x: " +  pixelUV.x);
+			Debug.Log ("x: " +  pixelUV.y);
 
             tex.SetPixel(Mathf.FloorToInt(pixelUV.x), Mathf.FloorToInt(pixelUV.y), Color.black);
 

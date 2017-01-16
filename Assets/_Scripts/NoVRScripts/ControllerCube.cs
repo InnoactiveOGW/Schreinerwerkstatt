@@ -17,9 +17,24 @@ public class ControllerCube : MonoBehaviour {
 
     public Animation handAnimation;
     public Interactable selectedObject;
+	HapticFeedbackController hfc;
+	SteamVR_TrackedObject inputDevice;
+	SteamVR_Controller.Device controller
+	{
+		get
+		{   if (inputDevice != null)
+                return SteamVR_Controller.Input((int)inputDevice.index);
+            else
+                return null;
+		}
+	}
 
     // Use this for initialization
     void Start () {
+		inputDevice = GetComponentInParent<SteamVR_TrackedObject>();
+		hfc = GetComponentInParent<HapticFeedbackController>();
+
+
         currentRenderer = gameObject.GetComponentInChildren<Renderer>();
         currentMaterial = currentRenderer.material;
         currentMaterial.color = inactiveColor;
@@ -29,6 +44,13 @@ public class ControllerCube : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+        var triggerButton = false;
+        var gripButton = false;
+        if (false) { 
+		    triggerButton = controller.GetPressDown (Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger);
+		    gripButton = controller.GetPressUp (Valve.VR.EVRButtonId.k_EButton_Grip);
+        }
 
         if (Input.GetAxis("Mouse ScrollWheel") > 0)
         {
@@ -50,7 +72,7 @@ public class ControllerCube : MonoBehaviour {
             }
         }
 
-        if (pickedObject == null && Input.GetMouseButtonDown(0))
+		if (pickedObject == null && (triggerButton || Input.GetMouseButtonDown(0)))
         {
             if(selectedObject != null)
             {
@@ -141,7 +163,7 @@ public class ControllerCube : MonoBehaviour {
             }
             handAnimation.CrossFadeQueued("ReverseGrabEmpty");
         }
-        else if (pickedObject != null && Input.GetMouseButtonDown(1)) {
+		else if (pickedObject != null &&(gripButton|| Input.GetMouseButtonDown(1))) {
             
             Rigidbody rb = pickedObject.GetComponent<Rigidbody>();
             if (rb)

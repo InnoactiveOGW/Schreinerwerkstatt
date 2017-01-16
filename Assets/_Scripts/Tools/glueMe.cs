@@ -20,18 +20,22 @@ public class glueMe : MonoBehaviour
     {
         if (collision.gameObject.tag == "Wood")
         {
-            foreach (ContactPoint contact in collision.contacts)
-            {
+			if (collision.contacts.Length > 0) {
+				ContactPoint contact = collision.contacts [0];
+			
                 if (this.gameObject.transform.parent == null)
                 {
                     //FixedJoint joint = this.gameObject.AddComponent<FixedJoint>();
                     this.gameObject.transform.rotation = collision.gameObject.transform.rotation;
+					this.gameObject.transform.position = contact.point - collision.transform.up * 0.01f; 
                     Rigidbody rigi = this.gameObject.GetComponent<Rigidbody>();
                     rigi.constraints = RigidbodyConstraints.FreezeAll;
                     Rigidbody rbWood = collision.gameObject.GetComponent<Rigidbody>();
                     if(rbWood != null)
                     {
                         rbWood.constraints = RigidbodyConstraints.FreezeAll;
+						rbWood.isKinematic = true;
+						rbWood.useGravity = false;
                     }
                     //   rigi.isKinematic = true;
                     this.transform.SetParent(collision.gameObject.transform);
@@ -49,7 +53,7 @@ public class glueMe : MonoBehaviour
 
                 return;
             }
-        }
+		}
     }
 
 }
