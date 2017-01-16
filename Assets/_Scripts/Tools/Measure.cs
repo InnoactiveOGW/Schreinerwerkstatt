@@ -8,11 +8,14 @@ public class Measure : Tool
 
     Vector3 startPoint;
     TextMesh valueText;
+    AudioSource audio;
+    float lastDistance;
     // Use this for initialization
     void Start()
     {
         valueText = this.GetComponentInChildren<TextMesh>();
         isPickedup = false;
+        audio = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -36,11 +39,16 @@ public class Measure : Tool
 
             }
             Vector3 endpoint = this.gameObject.transform.position;
-            valueText.text = calculateDistance(startPoint, endpoint);
+            float currentDistance = calculateDistance(startPoint, endpoint);
+            valueText.text = currentDistance.ToString();
+            if (!audio.isPlaying && currentDistance!=lastDistance)
+                audio.Play();
             DrawLine(endpoint);
+            lastDistance = currentDistance;
         }
         else
         {
+            audio.Stop();
             Destroy(myLine);
             valueText.text = "";
         }
@@ -48,9 +56,10 @@ public class Measure : Tool
 
     }
 
-    private string calculateDistance(Vector3 startPoint, Vector3 endpoint)
+    private float calculateDistance(Vector3 startPoint, Vector3 endpoint)
     {
-        return (((startPoint - endpoint).magnitude) * Config.sizeFactor).ToString();
+
+        return (((startPoint - endpoint).magnitude) * Config.sizeFactor);
 
     }
 
