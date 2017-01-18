@@ -8,6 +8,8 @@ public class PencilDraw : Pickup
     bool painting = false;
     Texture2D tex;
     Renderer paintRender;
+	GameObject paintedWood;
+
     // Use this for initialization
     void Start()
     {
@@ -17,6 +19,7 @@ public class PencilDraw : Pickup
     // Update is called once per frame
     void Update()
     {
+
         if (painting && paintRender != null)
         {
 
@@ -57,18 +60,43 @@ public class PencilDraw : Pickup
 
     public void OnTriggerEnter(Collider colider)
     {
-        if (colider.gameObject.tag != "Wood") return;
+		if (colider.gameObject.tag != "Wood") return;
+
         paintRender = colider.gameObject.GetComponent<Renderer>();
         painting = true;
         tex = paintRender.material.GetTexture("_MainTex") as Texture2D;
+
+		paintedWood = colider.gameObject;
+		Rigidbody rbWood = paintedWood.GetComponent<Rigidbody> ();
+		if (rbWood != null) {
+			rbWood.isKinematic = true;
+		}
+		MeshCollider[] woodColliders = paintedWood.GetComponents<MeshCollider> ();
+		foreach (MeshCollider mc in woodColliders) {
+			if (!mc.isTrigger)
+				mc.convex = false;
+		}
     }
 
 
     public void OnTriggerExit(Collider colider)
     {
-        if (colider.gameObject.tag != "Wood") return;
+		if (colider.gameObject.tag != "Wood" ) return;
         paintRender = colider.gameObject.GetComponent<Renderer>();
         painting = false;
+
+		if (paintedWood != null) {
+			MeshCollider[] woodColliders = paintedWood.GetComponents<MeshCollider> ();
+			foreach (MeshCollider mc in woodColliders) {
+				if (!mc.convex)
+					mc.convex = true;
+			}
+			Rigidbody rbWood = paintedWood.GetComponent<Rigidbody> ();
+			if (rbWood != null) {
+				rbWood.isKinematic = false;
+			}
+			paintedWood = null;
+		}
     }
 
     //TODO 

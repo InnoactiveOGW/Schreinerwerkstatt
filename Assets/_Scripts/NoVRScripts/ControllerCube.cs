@@ -47,7 +47,10 @@ public class ControllerCube : MonoBehaviour {
 
         var triggerButton = false;
         var gripButton = false;
-        if (false) { 
+
+		// critical if not using VR Gear
+		// #TODO
+        if (Config.isVR) { 
 		    triggerButton = controller.GetPressDown (Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger);
 		    gripButton = controller.GetPressUp (Valve.VR.EVRButtonId.k_EButton_Grip);
         }

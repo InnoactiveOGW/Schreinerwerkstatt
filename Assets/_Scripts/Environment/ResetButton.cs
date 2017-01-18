@@ -3,11 +3,9 @@ using System.Collections;
 
 public class ResetButton : Interactable {
 
-
-    AudioSource audioClip;
 	// Use this for initialization
 	void Start () {
-        audioClip = GetComponent<AudioSource>();
+	
 	}
 	
 	// Update is called once per frame
@@ -17,10 +15,8 @@ public class ResetButton : Interactable {
 
     public override void interact(GameObject interactionGO)
     {
-        audioClip.Play();
-
         GameController gc = FindObjectOfType<GameController>();
-        LevelCtrl lc = gc.getCurrentLevel();
+        LevelControllerInterface lc = gc.getCurrentLevel();
         if(lc != null)
             lc.resetLevel();
     }

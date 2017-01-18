@@ -10,8 +10,6 @@ public class Saw : MonoBehaviour {
     GameObject cuttee;
     public Material defaultCapMaterial;
     GameObject blade;
-    AudioSource sawForward;
-    AudioSource sawBack;
 
     bool isSawing = false;
     Divider wood = null;
@@ -26,40 +24,18 @@ public class Saw : MonoBehaviour {
     // Use this for initialization
     void Start () {
         parentTransform = gameObject.transform.parent.transform;
-
-        AudioSource[] audio = GetComponents<AudioSource>();
-        if(audio.Length>1)
-        {
-            sawForward = audio[0];
-            sawBack = audio[1];
-        }
-        
-
     }
 	
 	// Update is called once per frame
 	void FixedUpdate () {
-        if (Input.GetKeyDown("f"))
-        {
-            sawForward.Play();
-        }
-        if (Input.GetKeyDown("r"))
-        {
-            sawForward.Play();
-        }
-
-
-        if (isSawing) {
+		if (isSawing) {
 			Transform t = gameObject.transform.parent.transform;
 			if (!Config.isVR) {
 				if (Input.GetKey ("r")) {
 					t.position += transform.forward * 0.01f;
-                    sawForward.Play();
-
-                } else if (Input.GetKey ("f")) {
+				} else if (Input.GetKey ("f")) {
 					t.position -= transform.forward * 0.01f;
 					t.position -= transform.up * 0.005f;
-                    sawBack.Play();
 				}
 			} else {
 				SteamVR_TrackedObject inputDevice = oldParent.GetComponentInParent<SteamVR_TrackedObject> ();
