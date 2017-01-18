@@ -6,7 +6,7 @@ public static class Config
 {
     public static float sizeFactor = 1;
 
-	public static bool isVR = true;
+	public static bool isVR = false;
 
 
 }

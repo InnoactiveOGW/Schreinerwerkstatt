@@ -21,9 +21,22 @@ public class Saw : MonoBehaviour {
 
     public Transform parentTransform;
 
+
+    //Audio
+    AudioSource sawForward;
+    AudioSource sawBack;
+
     // Use this for initialization
     void Start () {
         parentTransform = gameObject.transform.parent.transform;
+
+
+        AudioSource[] audio = GetComponents<AudioSource>();
+        if (audio.Length > 1)
+        {
+            sawForward = audio[0];
+            sawBack = audio[1];
+        }
     }
 	
 	// Update is called once per frame
@@ -32,9 +45,11 @@ public class Saw : MonoBehaviour {
 			Transform t = gameObject.transform.parent.transform;
 			if (!Config.isVR) {
 				if (Input.GetKey ("r")) {
-					t.position += transform.forward * 0.01f;
+                    sawForward.Play();
+                    t.position += transform.forward * 0.01f;
 				} else if (Input.GetKey ("f")) {
-					t.position -= transform.forward * 0.01f;
+                    sawForward.Play();
+                    t.position -= transform.forward * 0.01f;
 					t.position -= transform.up * 0.005f;
 				}
 			} else {
@@ -43,12 +58,18 @@ public class Saw : MonoBehaviour {
 
 				// if (controller != null && Mathf.Abs(controller.velocity.z) > 0.3)
 				if (controller != null) {
+                
 					Vector3 normalizedVelocity = controller.velocity;
 					t.position += t.forward * Vector3.Dot (t.forward, controller.velocity) * movementDelay;
 					t.position += t.up * Mathf.Abs (Vector3.Dot (t.forward, controller.velocity)) * -power;
 					//Debug.Log("controller.velocity: " + controller.velocity.ToString());
 					//Debug.Log("normalizedVelocityy: " + normalizedVelocity.ToString());
-				}
+                
+                    //addcondition for foorwad and backward
+                    if(true)
+                            sawForward.Play();
+
+                }
 			}
 		}
     }
