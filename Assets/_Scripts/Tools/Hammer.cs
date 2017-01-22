@@ -3,23 +3,21 @@ using System.Collections;
 
 public class Hammer : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+    SteamVR_Controller.Device getController()
+    {
+        SteamVR_TrackedObject inputDevice = this.gameObject.GetComponentInParent<SteamVR_TrackedObject>();
+        if (inputDevice != null)
+        {
+            SteamVR_Controller.Device controller = SteamVR_Controller.Input((int)inputDevice.index);
+            return controller;
+            //return controller.GetPressDown(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger);
+        }
+        return null;
+    }
 
-    //public override void doAction(GameObject g)
-    //{
-    //    //Debug.Log("Hammer object");
-    //    //var transform = g.transform;
-    //    //transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y, transform.localScale.z / 2);
-    //}
-
+    HapticFeedbackController getHapticFeedbackController() {
+        return GetComponentInParent<HapticFeedbackController>();
+    }
 
     void OnTriggerEnter(Collider collider) {
         NailController nc = collider.gameObject.GetComponent < NailController >();
@@ -36,12 +34,22 @@ public class Hammer : MonoBehaviour {
                 Rigidbody thisRB = gameObject.GetComponent<Rigidbody>();
                 if (thisRB)
                     force = thisRB.velocity.magnitude;
-                force = force > 0 ? force : 1;
+                else {
+                    SteamVR_Controller.Device controller = getController();
+                    if(controller != null)
+                        force = controller.velocity.magnitude;
+
+                    HapticFeedbackController hfc = getHapticFeedbackController();
+                    if (hfc != null) {
+                        // TODO
+
+                    }
+                }
+                force = force > 0 ? force * 10 : 1;
                 Debug.Log("force: " + force);
                 nc.getPinnedToWood(force);
+                // TODO Verformung des Nagels bei schlechtem Treffen -> Vektoren zum bewerten: hammer.up, nail.up -> sollten im rechten Winkel zueinander stehen
             }
-
-            // TODO Verformung des Nagels bei schlechtem Treffen -> Vektoren zum bewerten: hammer.up, nail.up -> sollten im rechten Winkel zueinander stehen
         }
     }
 }

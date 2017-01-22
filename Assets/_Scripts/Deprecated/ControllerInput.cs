@@ -47,12 +47,12 @@ public class ControllerInput : MonoBehaviour
             {
                 Pickup testPickup = collider.GetComponent<Pickup>();
                 if(testPickup != null) { 
-                var currDis = Vector3.Distance(collider.transform.position, transform.position);
-                if (currDis < minDis)
-                {
-                    minDis = currDis;
-                    nearestCollider = collider;
-                }
+                    var currDis = Vector3.Distance(collider.transform.position, transform.position);
+                    if (currDis < minDis)
+                    {
+                        minDis = currDis;
+                        nearestCollider = collider;
+                    }
                 }
             }
             if (nearestCollider != null && pickedObject == null)

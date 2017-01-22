@@ -21,7 +21,6 @@ public class Saw : MonoBehaviour {
 
     public Transform parentTransform;
 
-
     //Audio
     AudioSource sawForward;
     AudioSource sawBack;
@@ -29,8 +28,6 @@ public class Saw : MonoBehaviour {
     // Use this for initialization
     void Start () {
         parentTransform = gameObject.transform.parent.transform;
-
-
         AudioSource[] audio = GetComponents<AudioSource>();
         if (audio.Length > 1)
         {
@@ -58,45 +55,42 @@ public class Saw : MonoBehaviour {
 
 				// if (controller != null && Mathf.Abs(controller.velocity.z) > 0.3)
 				if (controller != null) {
-                
 					Vector3 normalizedVelocity = controller.velocity;
 					t.position += t.forward * Vector3.Dot (t.forward, controller.velocity) * movementDelay;
 					t.position += t.up * Mathf.Abs (Vector3.Dot (t.forward, controller.velocity)) * -power;
-					//Debug.Log("controller.velocity: " + controller.velocity.ToString());
-					//Debug.Log("normalizedVelocityy: " + normalizedVelocity.ToString());
                 
                     //addcondition for foorwad and backward
                     if(true)
-                            sawForward.Play();
-
+                        sawForward.Play();
                 }
 			}
 		}
     }
 
+    // deprecated!!!
+    // Bewertung: Berechnung wie weit der Kollisionspunkt vom gewünschten entfernt ist
+    //
+    /* Wo liegt der gewünschte Schnittpunkt?
+     * -> center = 0,0,0 & scale = 1,1,1 =>
+     *  -> p = x,y,z
+     *  -> p auf Linie (center, forwardVec) projezieren
+     *  => p.z = Entfernung zum Mittelpunkt
+     *  => scaleA = 0.33, scaleB = 0.33, scaleC = 0.33
+     *  => s.z = scaleA / 2 || -scaleA / 2
+     *  
+     *  nächster Schnitt:
+     *  s.z = 0
+     *  
+     *  
+        Vector3 ab = gameObject.transform.forward;
+        Vector3 ap = localContactPoint;
+        Vector3 projectedConPoint = Vector3.Dot(ap, ab) / Vector3.Dot(ab, ab) * ab;
+        float distanceToCenter = projectedConPoint.z; 
+
+    */
+
     public void OnCollisionEnter(Collision collision)
     {
-        // TODO: Bewertung: Berechnung wie weit der Kollisionspunkt vom gewünschten entfernt ist
-        // -> TODO: Berechnung
-
-        /* TODO: Wo liegt der gewünschte Schnittpunkt?
-         * -> center = 0,0,0 & scale = 1,1,1 =>
-         *  -> p = x,y,z
-         *  -> p auf Linie (center, forwardVec) projezieren
-         *  => p.z = Entfernung zum Mittelpunkt
-         *  => scaleA = 0.33, scaleB = 0.33, scaleC = 0.33
-         *  => s.z = scaleA / 2 || -scaleA / 2
-         *  
-         *  nächster Schnitt:
-         *  s.z = 0
-         */
-        /*
-            Vector3 ab = gameObject.transform.forward;
-            Vector3 ap = localContactPoint;
-            Vector3 projectedConPoint = Vector3.Dot(ap, ab) / Vector3.Dot(ab, ab) * ab;
-            float distanceToCenter = projectedConPoint.z; 
-
-        */
 		Debug.Log ("Collision");
 
         foreach (ContactPoint contact in collision.contacts)
@@ -109,6 +103,11 @@ public class Saw : MonoBehaviour {
 					Debug.Log ("could not find Your Hand i want to saw dude");
 					return;
 				}
+
+                if (Vector3.Dot((contact.point - transform.position).normalized, -transform.forward) < 0) {
+                    Debug.Log("Hit wood at the wrong side => no sawing mode");
+                    return;
+                }
 					
                 initialContactPoint = contact.point;
                 Vector3 obpos = this.gameObject.transform.position;
@@ -124,11 +123,34 @@ public class Saw : MonoBehaviour {
         }
     }
 
+    int tempLength = 0;
+
+    public void OnCollisionStay(Collision collisionInfo)
+    {
+        foreach (ContactPoint contact in collisionInfo.contacts)
+        {
+            // Debug.DrawRay(contact.point, contact.normal * 10, Color.white);
+            if (isSawing) {
+                Debug.DrawRay(contact.point, contact.normal * 10, Color.white);
+            }
+        }
+        if(isSawing && tempLength != collisionInfo.contacts.Length) { 
+            Debug.Log(collisionInfo.contacts.Length);
+            tempLength = collisionInfo.contacts.Length;
+        }
+    }
+
     public void OnCollisionExit(Collision collision)
     {
         if(collision.gameObject.tag == "Wood")
             Debug.Log("collision exit");
         // && (initialContactPoint.y - collision.contacts[0].point.y) > 0.5
+
+        if (Vector3.Dot((initialContactPoint - transform.position).normalized, (transform.forward).normalized) < 0) {
+            Debug.Log("Exited wood on the wrong side => no cut");
+            return;
+        }
+
         if (isSawing && collision.gameObject.tag == "Wood")
         {
 			cutObject (cuttee, collision);
@@ -137,20 +159,13 @@ public class Saw : MonoBehaviour {
     }
 
 	void cutObject(GameObject cuttee, Collision collision){
-		Debug.Log("cutting");
-		// gameObject.transform.SetParent(oldParent.transform);
-		isSawing = false;
-		//wood = null;
-
 		Material capMaterial = defaultCapMaterial;
-		// TODO
-		// welches Material wird hier verwendet?
 		Vector3 tempScale = cuttee.transform.localScale;
 		Vector3 tempPosition = cuttee.transform.position;
 		ToolUser1 tu = FindObjectOfType<ToolUser1>();
 
 		string preCutTag = cuttee.tag;
-		Vector3 cutterPosition = initialContactPoint - new Vector3(0, 1, 0);
+        Vector3 cutterPosition = initialContactPoint; // - new Vector3(0, 1, 0);
 		GameObject[] pieces = tu.cut(cutterPosition, initialRotation, cuttee);
 		foreach (var p in pieces)
 		{
@@ -186,16 +201,20 @@ public class Saw : MonoBehaviour {
 				p.AddComponent<Pickup>();
 		}
 
-		Pickup pu = parentTransform.gameObject.GetComponent<Pickup>();
-		if(pu != null)
-		{
-			pu.GetPickedUp(oldParent);
-			pu.gameObject.transform.position = oldParent.transform.position;
-			pu.gameObject.transform.rotation = oldParent.transform.rotation;
-		}
-		oldParent = null;
-	
-	}
+        endSawingMode();
+    }
+
+    void endSawingMode() {
+        isSawing = false;
+        Pickup pu = parentTransform.gameObject.GetComponent<Pickup>();
+        if (pu != null)
+        {
+            pu.GetPickedUp(oldParent);
+            pu.gameObject.transform.position = oldParent.transform.position;
+            pu.gameObject.transform.rotation = oldParent.transform.rotation;
+        }
+        oldParent = null;
+    }
 
 
     void enterSawingMode()
