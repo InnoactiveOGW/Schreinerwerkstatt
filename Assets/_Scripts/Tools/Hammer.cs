@@ -21,34 +21,22 @@ public class Hammer : MonoBehaviour {
 
     void OnTriggerEnter(Collider collider) {
         NailController nc = collider.gameObject.GetComponent < NailController >();
+        
         if (nc != null && nc.canBeNailed)
         {
             Rigidbody rb = nc.gameObject.GetComponent<Rigidbody>();
             if(rb != null)
             {
                 rb.constraints = RigidbodyConstraints.FreezeAll;
-
-                // Problem: rigidbody wird nicht direkt benutzt um Position des Objekts zu verändern => entweder Geschwindigkeit 
-                // selbst berechnen oder Rigidbody verwenden (kann zu sehr merkwürdigen Ergebnissen führen!)
-                float force = 1;
-                Rigidbody thisRB = gameObject.GetComponent<Rigidbody>();
-                if (thisRB)
-                    force = thisRB.velocity.magnitude;
-                else {
-                    SteamVR_Controller.Device controller = getController();
-                    if(controller != null)
-                        force = controller.velocity.magnitude;
-
-                    HapticFeedbackController hfc = getHapticFeedbackController();
-                    if (hfc != null) {
-                        // TODO
-
-                    }
+                Vector3 velocity = new Vector3(0,1,0);
+                SteamVR_Controller.Device controller = getController();
+                if(controller != null)
+                    velocity = controller.velocity;
+                HapticFeedbackController hfc = getHapticFeedbackController();
+                if (hfc != null) {
+                    // TODO: haptic feedback
                 }
-                force = force > 0 ? force * 10 : 1;
-                Debug.Log("force: " + force);
-                nc.getPinnedToWood(force);
-                // TODO Verformung des Nagels bei schlechtem Treffen -> Vektoren zum bewerten: hammer.up, nail.up -> sollten im rechten Winkel zueinander stehen
+                nc.getPinnedToWood(velocity, transform.position);
             }
         }
     }
