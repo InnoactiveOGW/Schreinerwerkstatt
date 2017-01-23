@@ -15,6 +15,25 @@ public class ToolUser1 : MonoBehaviour {
         return BLINDED_AM_ME.MeshCut.Cut(victim, transform.position, transform.right, capMaterial);
     }
 
+    public GameObject[] cut(Vector3 position, Vector3 lookAtPosition, Vector3 newUpVector, GameObject victim1)
+    {
+        this.gameObject.transform.position = position;
+        this.gameObject.transform.LookAt(lookAtPosition);
+        this.gameObject.transform.up = newUpVector;
+        GameObject victim = victim1;
+        if (capMaterial == null)
+            capMaterial = victim.GetComponent<Renderer>().material;
+        return BLINDED_AM_ME.MeshCut.Cut(victim, transform.position, transform.right, capMaterial);
+    }
+
+    public GameObject[] cut(GameObject victim1)
+    {
+        GameObject victim = victim1;
+        if (capMaterial == null)
+            capMaterial = victim.GetComponent<Renderer>().material;
+        return BLINDED_AM_ME.MeshCut.Cut(victim, transform.position, transform.right, capMaterial);
+    }
+
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;
