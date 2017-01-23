@@ -41,9 +41,11 @@ public class Measure : Tool
             Vector3 endpoint = this.gameObject.transform.position;
             float currentDistance = calculateDistance(startPoint, endpoint);
             valueText.text = currentDistance.ToString();
-            if (!audioMeasure.isPlaying && currentDistance != lastDistance)
-                audioMeasure.Play();
             DrawLine(endpoint);
+
+            if (audioMeasure != null && !audioMeasure.isPlaying && currentDistance != lastDistance)
+                audioMeasure.Play();
+            
         }
         else
         {

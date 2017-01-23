@@ -47,35 +47,69 @@ public class ControllerCube : MonoBehaviour {
 
         var triggerButton = false;
         var gripButton = false;
-
-		// critical if not using VR Gear
-		// #TODO
-        if (Config.isVR) { 
-		    triggerButton = controller.GetPressDown (Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger);
-		    gripButton = controller.GetPressUp (Valve.VR.EVRButtonId.k_EButton_Grip);
-        }
-
-        if (Input.GetAxis("Mouse ScrollWheel") > 0)
+        if (Config.isVR)
         {
-            Vector3 direction = gameObject.transform.position - gameObject.transform.parent.position;
-            //direction.y = 0;
-            gameObject.transform.position += direction * 0.1f;
+            triggerButton = controller.GetPressDown(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger);
+            gripButton = controller.GetPressUp(Valve.VR.EVRButtonId.k_EButton_Grip);
+                
+            if (pickedObject == null && triggerButton )
+            {
+                if (selectedObject != null && selectedObject is Pickup)
+                {
+                    (selectedObject as Pickup).GetPickedUp(gameObject, out pickedObject);
+                    Rigidbody rb = pickedObject.GetComponent<Rigidbody>();
+                    if (rb)
+                    {
+                        rb.constraints = RigidbodyConstraints.FreezeAll;
+                        // rb.useGravity = false;
+                    }
+                    if (selectedObject.tag == "Tool")
+                    {
+                        pickedObject.transform.position = this.gameObject.transform.position;
+                        pickedObject.transform.rotation = this.gameObject.transform.rotation;
+                    }
+                    //handAnimation.CrossFade("GrabEmpty");
+                }
+                else if (selectedObject != null)
+                {
+                    selectedObject.interact(this.gameObject);
+                }
+                else {
+                    handAnimation.CrossFade("GrabEmpty");
+                    handAnimation.CrossFadeQueued("ReverseGrabEmpty");
+                }
+                return;
+            }
+            else if (pickedObject != null && gripButton)
+            {
+                Rigidbody rb = pickedObject.GetComponent<Rigidbody>();
+                if (rb)
+                {
+                    rb.constraints = RigidbodyConstraints.None;
+                }
+                pickedObject.GetReleased(new Vector3(0, 0, 0));
+                pickedObject = null;
+                handAnimation.CrossFade("ReverseGrabEmpty");
+                return;
+            }
+           
         }
-        else if (Input.GetAxis("Mouse ScrollWheel") < 0) {
-            Vector3 direction = gameObject.transform.position - gameObject.transform.parent.position;
-            //direction.y = 0;
-            gameObject.transform.position -= direction * 0.1f;
-        }
-
-        if(changeColor && colorDelta != null)
-        {
-            currentMaterial.color += colorDelta * 0.1f;
-            if (currentMaterial.color == targetColor) {
-                changeColor = false;
+        else {
+            if (Input.GetAxis("Mouse ScrollWheel") > 0)
+            {
+                Vector3 direction = gameObject.transform.position - gameObject.transform.parent.position;
+                gameObject.transform.position += direction * 0.1f;
+            }
+            else if (Input.GetAxis("Mouse ScrollWheel") < 0)
+            {
+                Vector3 direction = gameObject.transform.position - gameObject.transform.parent.position;
+                gameObject.transform.position -= direction * 0.1f;
             }
         }
 
-		if (pickedObject == null && (triggerButton || Input.GetMouseButtonDown(0)))
+        // deprecated / non-VR Code, needs cleanup
+
+		if (pickedObject == null && Input.GetMouseButtonDown(0))
         {
             if(selectedObject != null)
             {
@@ -96,9 +130,6 @@ public class ControllerCube : MonoBehaviour {
                 {
                     selectedObject.interact(this.gameObject);
                 }
-
-
-                // pickedObject = selectedObject;
                 return;
             }
 
@@ -166,7 +197,7 @@ public class ControllerCube : MonoBehaviour {
             }
             handAnimation.CrossFadeQueued("ReverseGrabEmpty");
         }
-		else if (pickedObject != null &&(gripButton|| Input.GetMouseButtonDown(1))) {
+		else if (pickedObject != null && Input.GetMouseButtonDown(1)) {
             
             Rigidbody rb = pickedObject.GetComponent<Rigidbody>();
             if (rb)
@@ -177,11 +208,23 @@ public class ControllerCube : MonoBehaviour {
             pickedObject = null;
             handAnimation.CrossFadeQueued("ReverseGrabEmpty");
         }
+
+        if (changeColor && colorDelta != null)
+        {
+            currentMaterial.color += colorDelta * 0.1f;
+            if (currentMaterial.color == targetColor)
+            {
+                changeColor = false;
+            }
+        }
     }
 
     void OnTriggerEnter(Collider collider) {
+        if (pickedObject != null)
+            return;
         Interactable p = collider.gameObject.GetComponent<Interactable>();
-        if(p != null) { 
+        if(p != null) {
+            Debug.Log("Found interactable");
             colorDelta = activeColor - currentMaterial.color;
             changeColor = true;
             targetColor = activeColor;
@@ -190,11 +233,16 @@ public class ControllerCube : MonoBehaviour {
         }
     }
 
-    void OnTriggerExit() {
-        colorDelta =  inactiveColor - currentMaterial.color;
-        changeColor = true;
-        targetColor = inactiveColor;
-        handAnimation.CrossFade("ReversePoint");
-        selectedObject = null;
+    void OnTriggerExit(Collider collider) {
+        if (pickedObject != null)
+            return;
+        if (selectedObject != null && selectedObject.gameObject == collider.gameObject)
+        {
+            colorDelta = inactiveColor - currentMaterial.color;
+            changeColor = true;
+            targetColor = inactiveColor;
+            handAnimation.CrossFade("ReversePoint");
+            selectedObject = null;
+        }
     }
 }
