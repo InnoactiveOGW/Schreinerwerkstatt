@@ -128,12 +128,13 @@ public class GameController : MonoBehaviour {
         return currentLevel;
     }
 
-    public void finishLevel(GameObject finishedObject)
+    public string finishLevel(GameObject finishedObject)
     {
         float score = currentLevel.evaluateConstruction(finishedObject);
-
+        
         Debug.Log(score);
 
+        return score.ToString();
         // evaluateConstruction
     }
 }

@@ -5,8 +5,11 @@ public class FinishPlatform : MonoBehaviour {
 
     public GameObject explosion;
      ParticleSystem particle;
+    public GameObject Score;
+    TextMesh scoreText;
     private void Start()
     {
+        scoreText = Score.GetComponent<TextMesh>();
         particle =  explosion.GetComponent<ParticleSystem>();
     }
     void OnTriggerEnter(Collider collider)
@@ -14,7 +17,7 @@ public class FinishPlatform : MonoBehaviour {
         if(collider.gameObject.tag == "Wood")
         {
             GameController gc = FindObjectOfType<GameController>();
-            gc.finishLevel(collider.gameObject);
+            scoreText.text =  gc.finishLevel(collider.gameObject);
             particle.Play();
             Destroy(collider.gameObject);
         }
