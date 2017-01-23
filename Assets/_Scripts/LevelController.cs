@@ -23,8 +23,14 @@ public class LevelController : LevelControllerInterface{
     Vector3 originalPosition;
     Quaternion orginalRotation;
 
-	// Use this for initialization
-	void Start () {
+
+    public GameObject Step1;
+    public GameObject Step2;
+    public GameObject Step3;
+    public GameObject Step4;
+    public GameObject Step5;
+    // Use this for initialization
+    void Start () {
         originalPosition = gameObject.transform.position;
         orginalRotation = gameObject.transform.rotation;
     }
@@ -155,8 +161,9 @@ public class LevelController : LevelControllerInterface{
     private float evaluateWood(List<Transform> wood, GameObject go)
     {
         float result = -1;
-		// Evaluate the size of the wood pieces
-		// more similarity => better score
+        // Evaluate the size of the wood pieces
+        // more similarity => better score
+        if (!(wood.Count > 0)) return 0;
         Mesh lastMesh = wood[wood.Count - 1].gameObject.GetComponent<MeshFilter>().sharedMesh;
         foreach (Transform w in wood)
         {

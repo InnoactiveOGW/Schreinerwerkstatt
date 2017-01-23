@@ -3,6 +3,8 @@ using System.Collections;
 
 public class LevelControllerInterface : MonoBehaviour {
 
+
+    public int LevelNumber = 0;
 	// Use this for initialization
 	void Start () {
 	
