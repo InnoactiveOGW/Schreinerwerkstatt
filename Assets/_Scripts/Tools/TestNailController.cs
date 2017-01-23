@@ -131,7 +131,7 @@ public class TestNailController : NailController {
 
         float dot = Vector3.Dot(-transform.up.normalized, velocity.normalized);
         Debug.Log("Piined Dot Product: " + dot);
-        if (dot < 0.95)
+        if (dot < 0.93)
         {
             float velocityFactor = 5;
 
@@ -142,23 +142,14 @@ public class TestNailController : NailController {
             modBone.Rotate(new Vector3(-cosZ, -cosY, -cosX));
             dot = (dot / 2) * velocity.sqrMagnitude;
             score = score - dot > 0 ? score - dot : 0;
-
-
-            Color newDelta = (bestScoreColor - currentMaterial.color) * score / 25;
-            setNewColor(currentMaterial.color - newDelta);
         }
         else {
             score = score + dot * velocity.sqrMagnitude;
-
-
-            Color newDelta = (bestScoreColor - currentMaterial.color) * score / 25;
-            setNewColor(currentMaterial.color + newDelta);
+            transform.position = transform.position - transform.up * force * dot * 0.01f;
         }
-
-        
+        Color newDelta = (bestScoreColor - noScoreColor) * score / 25;
+        setNewColor(newDelta + noScoreColor);
         Debug.Log("Score: " + score);
-
-        transform.position = transform.position - transform.up * force * dot * 0.01f;
         
         if (firstHit) {
             Pickup pu = GetComponent<Pickup>();
