@@ -60,7 +60,7 @@ public class Saw : MonoBehaviour {
 					t.position += t.up * Mathf.Abs (Vector3.Dot (t.forward, controller.velocity)) * -power;
                 
                     //addcondition for foorwad and backward
-                    if(true)
+                    if(sawForward != null)
                         sawForward.Play();
                 }
 			}
