@@ -37,7 +37,6 @@ public class Measure : Tool
                 lr.SetWidth(0.01f, 0.01f);
                 startPoint = this.gameObject.transform.position;
                 lr.SetPosition(0, startPoint);
-
             }
             Vector3 endpoint = this.gameObject.transform.position;
             float currentDistance = calculateDistance(startPoint, endpoint);
