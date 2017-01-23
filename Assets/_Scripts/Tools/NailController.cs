@@ -10,6 +10,8 @@ public class NailController : MonoBehaviour {
     public List<GameObject> woods = null;
     private float oldMass = 0;
 
+
+
     void Start() {
         woods = new List<GameObject>();
     }
@@ -50,7 +52,7 @@ public class NailController : MonoBehaviour {
         }
     }
 
-    public void getPinnedToWood(float force)
+    public virtual void getPinnedToWood(float force)
     {
         if (preventProgress)
             return;
@@ -70,6 +72,32 @@ public class NailController : MonoBehaviour {
         foreach (GameObject wood in woods)
         {
             if(wood.transform.parent != parent)
+                wood.transform.SetParent(parent);
+        }
+    }
+
+    public virtual void getPinnedToWood(Vector3 velocity, Vector3 hammerPosition)
+    {
+        float force = velocity.magnitude;
+
+        if (preventProgress)
+            return;
+
+        transform.position = transform.position - transform.up * force * 0.001f;
+
+        //Debug.Log("pinning nail to wood");
+        //foreach (GameObject wood in woods) {
+        //    wood.transform.SetParent(null);
+        //}
+        //// old: transform.position = transform.position - transform.up * force * 0.001f;
+        ////Pickup parentPickup = parent.GetComponent<Pickup>();
+        ////parentPickup.GetReleased();
+
+        // TODO
+
+        foreach (GameObject wood in woods)
+        {
+            if (wood.transform.parent != parent)
                 wood.transform.SetParent(parent);
         }
     }

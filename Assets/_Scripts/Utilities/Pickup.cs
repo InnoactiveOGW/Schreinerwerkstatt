@@ -13,21 +13,30 @@ public class Pickup : Interactable
         isPickedup = true;
     }
 
-    public void GetPickedUp(GameObject byThisObject, out Pickup parent)
+    public void GetPickedUp(GameObject byThisObject, out Pickup pickedObj)
     {
 
         // Transform nextParent = this.gameObject.transform.parent;
-        Transform tempParent = this.gameObject.transform;
-        if (gameObject.tag == "Wood")
-            while (tempParent.parent != null)
+        Transform tempPickup = this.gameObject.transform;
+        Pickup pu = this;
+        while (tempPickup.parent != null)
+        {
+            Pickup tempPu = tempPickup.parent.GetComponent<Pickup>();
+            if(tempPu != null)
             {
-                tempParent = tempParent.parent;
+                pu = tempPu;
             }
+            tempPickup = tempPickup.parent;
+        }
 
-        Pickup pu = tempParent.GetComponent<Pickup>();
-        parent = pu;
-        tempParent.SetParent(byThisObject.transform);
-        isPickedup = true;
+        pu.gameObject.transform.SetParent(byThisObject.transform);
+        pu.isPickedup = true;
+
+        // set out parameter
+        pickedObj = pu;
+        
+               
+        // isPickedup = true;
     }
 
     public void GetReleased()

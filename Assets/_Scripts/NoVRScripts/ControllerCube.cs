@@ -224,7 +224,7 @@ public class ControllerCube : MonoBehaviour {
             return;
         Interactable p = collider.gameObject.GetComponent<Interactable>();
         if(p != null) {
-            Debug.Log("Found interactable");
+            // Debug.Log("Found interactable");
             colorDelta = activeColor - currentMaterial.color;
             changeColor = true;
             targetColor = activeColor;
