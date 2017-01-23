@@ -60,6 +60,14 @@ public class TestNailController : NailController {
         {
             Destroy(rb);
         }
+
+        setNewColor(noScoreColor);
+
+        CuttingGameController cgc = FindObjectOfType<CuttingGameController>();
+        if (cgc != null)
+        {
+            cgc.addMiss(1);
+        }
     }
 
     void OnTriggerEnter(Collider collision) {
@@ -143,11 +151,27 @@ public class TestNailController : NailController {
             dot = (dot / 2) * velocity.sqrMagnitude;
             score = score - dot > 0 ? score - dot : 0;
         }
-        else {
-            score = score + dot * velocity.sqrMagnitude;
+        else
+        {
+            float addScore = dot * force;
+
+            CuttingGameController cgc = FindObjectOfType<CuttingGameController>();
+            if (cgc != null)
+            {
+                cgc.score -= Mathf.RoundToInt(score);
+            }
+
+            score = score + addScore;
+            if (cgc != null)
+            {
+                cgc.score += Mathf.RoundToInt(score);
+            }
             transform.position = transform.position - transform.up * force * dot * 0.01f;
+
+            
         }
-        Color newDelta = (bestScoreColor - noScoreColor) * score / 25;
+
+        Color newDelta = (bestScoreColor - noScoreColor) * score / 15;
         setNewColor(newDelta + noScoreColor);
         Debug.Log("Score: " + score);
         
