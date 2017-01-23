@@ -9,7 +9,6 @@ public class WoodMaterial : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-
         Texture2D texture = gameObject.GetComponent<Renderer>().material.GetTexture("_MainTex") as Texture2D;
 
         if (texture == null)
