@@ -8,8 +8,11 @@ public class SpawnWood : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        GameObject[] woods = GameObject.FindGameObjectsWithTag("WoodCube");
 
+        if (!gameCtrl.playing)
+            return;
+
+        GameObject[] woods = GameObject.FindGameObjectsWithTag("WoodCube");
 
         if (gameCtrl.playing && woods.Length < gameCtrl.maxPieces) {
             Debug.Log("spawning new wood");

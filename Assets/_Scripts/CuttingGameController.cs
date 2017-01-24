@@ -17,7 +17,8 @@ public class CuttingGameController : GameController {
     private TextMesh txtScore;
     private TextMesh txtMiss;
 
-    public bool playing = true;
+    public bool playing = false;
+    
 
 	// Use this for initialization
 	void Start () {
@@ -40,6 +41,15 @@ public class CuttingGameController : GameController {
     {
         miss += newMiss;
         txtMiss.text = miss.ToString();
+    }
+
+    public void resetLevel()
+    {
+        score = 0;
+        miss = 0;
+        txtScore.text = score.ToString();
+        txtMiss.text = miss.ToString();
+        playing = true;
     }
 
 
