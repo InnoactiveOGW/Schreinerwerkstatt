@@ -22,6 +22,8 @@ public class LaserBlade : MonoBehaviour {
 
     public Transform parentTransform;
 
+    int hitCount = 0;
+
     //Audio
     AudioSource sawForward;
     AudioSource sawBack;
@@ -38,15 +40,16 @@ public class LaserBlade : MonoBehaviour {
     }
 	
 	// Update is called once per frame
-	void FixedUpdate () {
-
+	void Update () {
+        if (hitCount > 0 && cuttee == null) { 
+            hitCount = 0;
+            CapsuleCollider thiscollider = GetComponent<CapsuleCollider>();
+            thiscollider.isTrigger = false;
+        }
     }
 
     public void OnCollisionEnter(Collision collision)
     {
-        
-
-
         if (!collision.gameObject.tag.Contains("Wood") 
             || collision.gameObject.tag == "WoodCubeCut" 
             || cuttee != null)
@@ -65,8 +68,13 @@ public class LaserBlade : MonoBehaviour {
                 initialRightVector = collision.gameObject.transform.rotation * this.gameObject.transform.right; // this.gameObject.transform.rotation * 
                 Debug.Log("initialContactPoint: " + initialContactPoint.ToString());
                 cuttee = collision.gameObject;
-                Rigidbody rb = cuttee.GetComponent<Rigidbody>();
-                rb.isKinematic = true;
+                hitCount++;
+                //Rigidbody rb = cuttee.GetComponent<Rigidbody>();
+                //rb.isKinematic = true;
+
+                CapsuleCollider collider = GetComponent<CapsuleCollider>();
+                collider.isTrigger = true;
+
                 break;
             }
         }
@@ -74,15 +82,6 @@ public class LaserBlade : MonoBehaviour {
         ToolUser1 tu = GetComponentInChildren<ToolUser1>();
         if (tu != null)
         {
-            // tu.transform.LookAt(cuttee.transform.position);
-            Vector3 ab = initialContactPoint + gameObject.transform.up;
-            Vector3 ap = initialContactPoint;
-
-
-            Vector3 projectedConPoint = Vector3.Dot(ap, ab) / Vector3.Dot(ab, ab) * ab;
-
-            // tu.transform.LookAt(projectedConPoint);
-            // tu.transform.up = initialUpVector;
             tu.transform.SetParent(null);
             tu.transform.position = initialContactPoint;
         }
@@ -90,13 +89,15 @@ public class LaserBlade : MonoBehaviour {
 
     int tempLength = 0;
 
-    public void OnCollisionExit(Collision collision)
+    public void OnTriggerExit(Collider collider)
     {
         if (cuttee != null)
         {
-
 			cutObject (cuttee);
             cuttee = null;
+            hitCount--;
+            CapsuleCollider thiscollider = GetComponent<CapsuleCollider>();
+            thiscollider.isTrigger = false;
         }
     }
 
