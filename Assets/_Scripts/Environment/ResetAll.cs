@@ -1,8 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.SceneManagement;
-using UnityEditor.SceneManagement;
-using UnityEditor;
 
 public class ResetAll : Interactable
 {

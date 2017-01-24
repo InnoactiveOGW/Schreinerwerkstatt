@@ -196,18 +196,18 @@ namespace BLINDED_AM_ME{
 		/// <summary>
 		/// Creates and returns a new mesh with generated lightmap uvs
 		/// </summary>
-		public Mesh GetMesh_GenerateSecondaryUVSet( UnityEditor.UnwrapParam param){
+		//public Mesh GetMesh_GenerateSecondaryUVSet( UnityEditor.UnwrapParam param){
 
-			Mesh shape = GetMesh();
+		//	Mesh shape = GetMesh();
 			
-			#if UNITY_EDITOR
-			// for light mapping
-			UnityEditor.Unwrapping.GenerateSecondaryUVSet(shape, param);
+		//	#if UNITY_EDITOR
+		//	// for light mapping
+		//	UnityEditor.Unwrapping.GenerateSecondaryUVSet(shape, param);
 
-			#endif
+		//	#endif
 
-			return shape;
-		}
+		//	return shape;
+		//}
 
 	}
 }

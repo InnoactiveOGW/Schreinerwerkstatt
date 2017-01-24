@@ -1,8 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.SceneManagement;
-using UnityEditor.SceneManagement;
-using UnityEditor;
 
 public class ChangeScene : Interactable
 {
@@ -18,6 +15,7 @@ public class ChangeScene : Interactable
     void Update () {
 	
 	}
+
     public override void interact(GameObject interactionGO)
     {
         audioClip.Play();
