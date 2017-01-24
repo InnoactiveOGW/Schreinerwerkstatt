@@ -164,7 +164,7 @@ public class TestNailController : NailController {
             score = score + addScore;
             if (cgc != null)
             {
-                cgc.score += Mathf.RoundToInt(score);
+                cgc.addScore(Mathf.RoundToInt(score));
             }
             transform.position = transform.position - transform.up * force * dot * 0.01f;
 
