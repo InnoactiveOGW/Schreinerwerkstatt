@@ -109,16 +109,6 @@ public class LaserBlade : MonoBehaviour {
         
         tu.transform.LookAt(transform.position, transform.up);
 
-        //Transform[] bladePositions = cuttee.GetComponentsInChildren<Transform>();
-        //foreach(Transform bladeTransform in bladePositions)
-        //{
-        //    if(bladeTransform.tag == "BladePosition")
-        //    {
-        //        tu.transform.position = bladeTransform.position;
-        //        tu.transform.rotation = bladeTransform.rotation;
-        //    }
-        //}
-
         GameObject[] pieces = tu.cut(cuttee);
 
         if(pieces.Length == 1)
@@ -126,7 +116,6 @@ public class LaserBlade : MonoBehaviour {
             tu.transform.LookAt(cuttee.transform.position, transform.up);
             pieces = tu.cut(cuttee);
         }
-
 
         foreach (var p in pieces)
 		{

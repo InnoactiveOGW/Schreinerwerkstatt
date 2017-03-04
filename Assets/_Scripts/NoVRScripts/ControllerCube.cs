@@ -9,6 +9,8 @@ public class ControllerCube : MonoBehaviour {
     Color targetColor;
     bool changeColor = false;
 
+
+
     Renderer currentRenderer;
     Material currentMaterial;
 
@@ -34,17 +36,13 @@ public class ControllerCube : MonoBehaviour {
 		inputDevice = GetComponentInParent<SteamVR_TrackedObject>();
 		hfc = GetComponentInParent<HapticFeedbackController>();
 
-
         currentRenderer = gameObject.GetComponentInChildren<Renderer>();
         currentMaterial = currentRenderer.material;
         currentMaterial.color = inactiveColor;
-
-        //handAnimation = gameObject.GetComponent<Animation>();
     }
 	
 	// Update is called once per frame
 	void Update () {
-
         var triggerButton = false;
         var gripButton = false;
         if (Config.isVR)

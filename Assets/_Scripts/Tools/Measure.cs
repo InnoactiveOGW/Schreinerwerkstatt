@@ -23,10 +23,8 @@ public class Measure : Tool
     void Update()
     {
 		bool triggerButton = getTriggerButton();
-
 		if ((Input.GetKey("g") || triggerButton) && isPickedup)
         {
-
             if (myLine == null)
             {
                 myLine = new GameObject();
@@ -40,20 +38,17 @@ public class Measure : Tool
             }
             Vector3 endpoint = this.gameObject.transform.position;
             float currentDistance = calculateDistance(startPoint, endpoint);
-            valueText.text = currentDistance.ToString();
+            valueText.text = currentDistance.ToString("F2");
             DrawLine(endpoint);
 
             if (audioMeasure != null && !audioMeasure.isPlaying && currentDistance != lastDistance)
                 audioMeasure.Play();
-            
         }
         else
         {
             Destroy(myLine);
             valueText.text = "";
         }
-
-
     }
 
     private float calculateDistance(Vector3 startPoint, Vector3 endpoint)
