@@ -13,10 +13,9 @@ public class Glue : Pickup
     // Update is called once per frame
     void Update()
     {
+        bool triggerButton = getTriggerButton();
 
-		bool triggerButton = getTriggerButton();
-
-		if ((Input.GetKey("g")||triggerButton) && Time.time - wait > 1 && isPickedup)
+        if ((Input.GetKey("g") || triggerButton) && Time.time - wait > 1 && isPickedup)
         {
             GameObject thisglue = (GameObject)Instantiate(glue, this.transform.position + this.transform.forward * (float)0.2, Quaternion.identity);
             wait = Time.time;
