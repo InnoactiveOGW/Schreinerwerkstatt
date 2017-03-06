@@ -79,21 +79,6 @@ public class Saw : MonoBehaviour {
 
     void Update()
     {
-        Pickup parent = parentTransform.GetComponent<Pickup>();
-        //if(isSawing && parent != null && !parent.isPickedup)
-        //{
-        //    endSawingMode();
-        //    parent.GetReleased();
-        //}
-        //if (cuttee != null)
-        //{
-        //    Rigidbody cutteeRB = cuttee.GetComponent<Rigidbody>();
-        //    if (cutteeRB != null)
-        //    {
-        //        cutteeRB.isKinematic = false;
-        //    }
-        //}
-
         if (!isSawing && lastCutTimer < cutDelay)
         {
             lastCutTimer += Time.deltaTime;
@@ -103,9 +88,13 @@ public class Saw : MonoBehaviour {
             }
         }
 
-        if(isSawing && parent.isPickedup && parentTransform.parent != null)
+        if(isSawing)
         {
-            parentTransform.parent = null;
+            Pickup parent = parentTransform.GetComponent<Pickup>();
+            if (parent.isPickedup && parentTransform.parent != null)
+            {
+                parentTransform.parent = null;
+            }
         }
     }
 
@@ -152,7 +141,6 @@ public class Saw : MonoBehaviour {
     {
         foreach (ContactPoint contact in collisionInfo.contacts)
         {
-            // Debug.DrawRay(contact.point, contact.normal * 10, Color.white);
             if (isSawing) {
                 Debug.DrawRay(contact.point, contact.normal * 10, Color.white);
             }
@@ -202,7 +190,7 @@ public class Saw : MonoBehaviour {
 		ToolUser1 tu = FindObjectOfType<ToolUser1>();
 
 		string preCutTag = cuttee.tag;
-        Vector3 cutterPosition = initialContactPoint; // - new Vector3(0, 1, 0);
+        Vector3 cutterPosition = initialContactPoint;
 		GameObject[] pieces = tu.cut(cutterPosition, initialRotation, cuttee);
 		foreach (var p in pieces)
 		{
@@ -262,11 +250,9 @@ public class Saw : MonoBehaviour {
             pu.GetPickedUp(oldParent);
             pu.gameObject.transform.localPosition = oldPositionToParent;
             pu.gameObject.transform.localRotation = oldRotationToParent;
-            
         }
         oldParent = null;
     }
-
 
     void enterSawingMode()
     {
@@ -275,12 +261,5 @@ public class Saw : MonoBehaviour {
         oldPositionToParent = parentTransform.localPosition;
         oldRotationToParent = parentTransform.localRotation;
         parentTransform.parent = null;
-
-        //Pickup pu = parentTransform.gameObject.GetComponent<Pickup>();
-        //if(pu != null)
-        //{
-        //    pu.gameObject.transform.parent = null;
-        //}
-        //Debug.Log("sawing mode entered");
     }
 }
