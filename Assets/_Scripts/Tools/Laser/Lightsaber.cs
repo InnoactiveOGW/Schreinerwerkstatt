@@ -22,7 +22,7 @@ public class Lightsaber : MonoBehaviour {
             if (controller != null)
                 triggerButton = controller.GetPressDown(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger);
         }
-        if (triggerButton)
+        if (triggerButton || Input.GetMouseButtonDown(0))
         {
             activated = !activated;
             //if (!activated)
