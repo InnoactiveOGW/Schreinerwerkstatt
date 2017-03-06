@@ -12,6 +12,7 @@ public class Saw : MonoBehaviour {
     GameObject blade;
 
     bool isSawing = false;
+    bool sawingPossible = true;
     Divider wood = null;
     GameObject oldParent = null;
     Vector3 oldPositionToParent;
@@ -110,7 +111,7 @@ public class Saw : MonoBehaviour {
 
     bool objectCanBeCut(GameObject cuttee)
     {
-        return oldParent == null && cuttee.tag == "Wood" && lastCutTimer >= cutDelay;
+        return oldParent == null && cuttee.tag == "Wood" && lastCutTimer >= cutDelay && sawingPossible;
     }
 
     public void OnCollisionEnter(Collision collision)
@@ -129,8 +130,6 @@ public class Saw : MonoBehaviour {
                     Debug.Log("Hit wood at the wrong side => no sawing mode");
                     return;
                 }
-
-                
 					
                 initialContactPoint = contact.point;
                 Vector3 obpos = this.gameObject.transform.position;
@@ -182,7 +181,21 @@ public class Saw : MonoBehaviour {
         }
     }
 
-	void cutObject(GameObject cuttee, Collision collision){
+    public void OnTriggerEnter(Collider other)
+    {
+        if (!isSawing)
+        {
+            sawingPossible = false;
+        }
+    }
+
+    public void OnTriggerExit(Collider other)
+    {
+        if(!sawingPossible)
+            sawingPossible = true;
+    }
+
+    void cutObject(GameObject cuttee, Collision collision){
 		Material capMaterial = defaultCapMaterial;
 		Vector3 tempScale = cuttee.transform.localScale;
 		Vector3 tempPosition = cuttee.transform.position;
