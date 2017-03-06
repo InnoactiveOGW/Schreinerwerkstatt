@@ -12,6 +12,7 @@ public class Saw : MonoBehaviour {
     GameObject blade;
 
     bool isSawing = false;
+    public bool triggerEntered = false;
     Divider wood = null;
     GameObject oldParent = null;
     Vector3 oldPositionToParent;
@@ -62,15 +63,25 @@ public class Saw : MonoBehaviour {
 				SteamVR_TrackedObject inputDevice = oldParent.GetComponentInParent<SteamVR_TrackedObject> ();
 				SteamVR_Controller.Device controller = SteamVR_Controller.Input ((int)inputDevice.index);
 
+
 				// if (controller != null && Mathf.Abs(controller.velocity.z) > 0.3)
 				if (controller != null) {
 					Vector3 normalizedVelocity = controller.velocity;
-					t.position += t.forward * Vector3.Dot (t.forward, controller.velocity) * movementDelay;
-					t.position += t.up * Mathf.Abs (Vector3.Dot (t.forward, controller.velocity)) * -power;
-                
-                    //add condition for foorwad and backward
-                    if(sawForward != null)
-                        sawForward.Play();
+                    float yForwForw = Vector3.Angle(normalizedVelocity, transform.forward);
+                    if (yForwForw < 15)
+                    {
+                        t.position += transform.forward * yForwForw * power;
+                    }
+                    else
+                    {
+                        float yForwUp = Vector3.Dot(transform.up, controller.velocity);
+                        t.position += transform.up * yForwUp * movementDelay;
+                        t.position += transform.forward * Mathf.Abs(yForwUp) * -power;
+
+                        //add condition for foorwad and backward
+                        if (sawForward != null)
+                            sawForward.Play();
+                    }
                 }
 			}
 		}
@@ -79,20 +90,6 @@ public class Saw : MonoBehaviour {
     void Update()
     {
         Pickup parent = parentTransform.GetComponent<Pickup>();
-        //if(isSawing && parent != null && !parent.isPickedup)
-        //{
-        //    endSawingMode();
-        //    parent.GetReleased();
-        //}
-        //if (cuttee != null)
-        //{
-        //    Rigidbody cutteeRB = cuttee.GetComponent<Rigidbody>();
-        //    if (cutteeRB != null)
-        //    {
-        //        cutteeRB.isKinematic = false;
-        //    }
-        //}
-
         if (!isSawing && lastCutTimer < cutDelay)
         {
             lastCutTimer += Time.deltaTime;
@@ -129,8 +126,6 @@ public class Saw : MonoBehaviour {
                     Debug.Log("Hit wood at the wrong side => no sawing mode");
                     return;
                 }
-
-                
 					
                 initialContactPoint = contact.point;
                 Vector3 obpos = this.gameObject.transform.position;
@@ -146,6 +141,8 @@ public class Saw : MonoBehaviour {
             }
         }
     }
+
+
 
     int tempLength = 0;
 
@@ -166,10 +163,10 @@ public class Saw : MonoBehaviour {
 
     public void OnCollisionExit(Collision collision)
     {
-        if(collision.gameObject.tag == "Wood" && isSawing)
+        if(collision.gameObject.tag == "Wood" && isSawing) // && !triggerEntered
         {
             float cutDirection = Vector3.Dot((initialContactPoint - transform.position).normalized, (transform.forward).normalized);
-            if (cutDirection < 0)
+            if (cutDirection < 0.2 || !triggerEntered)
             {
                 Debug.Log("Exited wood on the wrong side => no cut, cutDirection: " + cutDirection);
             }
