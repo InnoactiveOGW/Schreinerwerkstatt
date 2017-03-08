@@ -61,11 +61,12 @@ public class ControllerCube : MonoBehaviour {
                         rb.constraints = RigidbodyConstraints.FreezeAll;
                         // rb.useGravity = false;
                     }
-                    if (selectedObject.tag == "Tool")
-                    {
-                        pickedObject.transform.position = this.gameObject.transform.position;
-                        pickedObject.transform.rotation = this.gameObject.transform.rotation;
-                    }
+
+                    //if (selectedObject.tag == "Tool")
+                    //{
+                    //    pickedObject.transform.position = this.gameObject.transform.position;
+                    //    pickedObject.transform.rotation = this.gameObject.transform.rotation;
+                    //}
                     //handAnimation.CrossFade("GrabEmpty");
                 }
                 else if (selectedObject != null)

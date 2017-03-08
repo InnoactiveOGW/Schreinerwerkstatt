@@ -11,6 +11,8 @@ public class LevelController : LevelControllerInterface{
     public GameObject[] materials;
 
     public GameObject[] tools;
+    Dictionary<string, Vector3> toolPositions = new Dictionary<string, Vector3>();
+    Dictionary<string, Quaternion> toolRotations = new Dictionary<string, Quaternion>();
 
     Vector3 originalPosition;
     Quaternion orginalRotation;
@@ -25,6 +27,17 @@ public class LevelController : LevelControllerInterface{
     void Start () {
         originalPosition = gameObject.transform.position;
         orginalRotation = gameObject.transform.rotation;
+        getToolsPosition();
+    }
+
+    void getToolsPosition()
+    {
+        GameObject[] tools = GameObject.FindGameObjectsWithTag("Tool");
+        foreach(GameObject tool in tools)
+        {
+            toolPositions.Add(tool.name, tool.transform.position);
+            toolRotations.Add(tool.name, tool.transform.rotation);
+        }
     }
 	
 
@@ -49,6 +62,7 @@ public class LevelController : LevelControllerInterface{
         spawnLvl = false;
         spawnBlueprint();
         spawnMaterials();
+        resetTools();
     }
 
     void spawnBlueprint()
@@ -62,6 +76,18 @@ public class LevelController : LevelControllerInterface{
         foreach (GameObject g in materials)
         {
             Instantiate(g);
+        }
+    }
+
+    private void resetTools()
+    {
+        GameObject toolParent = GameObject.Find("Tools");
+        GameObject[] tools = GameObject.FindGameObjectsWithTag("Tool");
+        foreach (GameObject tool in tools)
+        {
+            tool.transform.position = toolPositions[tool.name];
+            tool.transform.rotation = toolRotations[tool.name];
+            tool.transform.parent = toolParent.transform;
         }
     }
 
@@ -97,15 +123,18 @@ public class LevelController : LevelControllerInterface{
         foreach (GameObject g in glue)
             Destroy(g);
 
-        GameObject[] tools = GameObject.FindGameObjectsWithTag("Tool");
-        foreach (GameObject t in tools)
-            Destroy(t.gameObject);
-        foreach(GameObject tool in this.tools)
-        {
-            Instantiate(tool);
-        }
-        GameObject[] blueprint = GameObject.FindGameObjectsWithTag("Blueprint");
-        foreach (GameObject bp in blueprint)
-            Destroy(bp);
+        //GameObject[] tools = GameObject.FindGameObjectsWithTag("Tool");
+        //foreach (GameObject t in tools)
+        //    Destroy(t.gameObject);
+        //foreach(GameObject tool in this.tools)
+        //{
+        //    Instantiate(tool);
+        //}
+
+        //GameObject[] blueprint = GameObject.FindGameObjectsWithTag("Blueprint");
+        //foreach (GameObject bp in blueprint)
+        //{
+        //    Destroy(bp);
+        //}
     }
 }
