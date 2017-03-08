@@ -114,7 +114,7 @@ public class Saw : MonoBehaviour {
     {
         foreach (ContactPoint contact in collision.contacts)
         {
-            if (contact.otherCollider == collision.collider && objectCanBeCut(collision.gameObject))
+            if (contact.otherCollider == collision.collider && objectCanBeCut(collision.collider.gameObject))
             {
                 ControllerCube cc = gameObject.transform.parent.GetComponentInParent<ControllerCube>();
 				if (cc == null) {
@@ -131,11 +131,12 @@ public class Saw : MonoBehaviour {
                 Vector3 obpos = this.gameObject.transform.position;
                 initialContactPosition = obpos;
                 initialRotation = this.gameObject.transform.rotation;
-                initialRightVector = collision.gameObject.transform.rotation * this.gameObject.transform.right; // this.gameObject.transform.rotation * 
+                initialRightVector = collision.collider.transform.rotation * this.gameObject.transform.right; // this.gameObject.transform.rotation * 
                 Debug.Log("initialContactPoint: " + initialContactPoint.ToString());
-                cuttee = collision.gameObject;
+                cuttee = collision.collider.gameObject;
 				Rigidbody rb = cuttee.GetComponent<Rigidbody> ();
-				rb.isKinematic = true;
+                if(rb != null)
+				    rb.isKinematic = true;
 
 				enterSawingMode();
             }
@@ -190,7 +191,35 @@ public class Saw : MonoBehaviour {
         Vector3 cutterPosition = initialContactPoint; // - new Vector3(0, 1, 0);
 
         // TODO: initialRotation should be oriented towards the nearest glue if the object has already been glue to another object
+        // only relevant when the object is glued to another one, needs more work before it can be implemented correctly
+        //if(cuttee.transform.parent != null && cuttee.transform.parent.tag == "Wood")
+        //{
+        //    Vector3 toNearestGlue = new Vector3(0, 0, 0);
+        //    float minDist = -1;
+        //    glueMe[] siblings = cuttee.transform.parent.GetComponentsInChildren<glueMe>();
+        //    foreach(glueMe glue in siblings)
+        //    {
+        //        Vector3 toGlue = glue.transform.position - transform.position;
+        //        float currentDist = toGlue.magnitude;
+        //        if ( currentDist < minDist || minDist == -1)
+        //        {
+        //            minDist = currentDist;
+        //            toNearestGlue = toGlue;
+        //        }
+        //    }
 
+        //    float angleToNearestGlue = Vector3.Angle(transform.right, toNearestGlue);
+        //    if(angleToNearestGlue > 90)
+        //    {
+        //        initialRotation *= Quaternion.Euler(transform.up * 180);
+        //        // initialRotation = initialRotation * new Quaternion().
+        //    }
+        //}
+        //Rigidbody cutteRB = cuttee.GetComponent<Rigidbody>();
+        //if(cutteRB == null)
+        //{
+        //    cuttee.AddComponent<Rigidbody>();
+        //}
 
 		GameObject[] pieces = tu.cut(cutterPosition, initialRotation, cuttee);
 		foreach (var p in pieces)
@@ -216,12 +245,21 @@ public class Saw : MonoBehaviour {
 				triggerMeshCollider.isTrigger = true;
 			}
 
-			Rigidbody rb = p.GetComponent<Rigidbody>();
-			if (rb == null)
-				p.AddComponent<Rigidbody> ();
-			else {
-				rb.isKinematic = false;
-			}
+            if(cuttee.transform.parent != null && cuttee.transform.parent.tag == "Wood" && cuttee.GetComponent<Rigidbody>() != null)
+            {
+                Destroy(cuttee.GetComponent<Rigidbody>());
+            }
+            else
+            {
+                Rigidbody rb = p.GetComponent<Rigidbody>();
+                if (rb == null)
+                    p.AddComponent<Rigidbody>();
+                else
+                {
+                    rb.isKinematic = false;
+                }
+            }
+			
 			Pickup pickup = p.GetComponent<Pickup>();
 			if (pickup == null)
 				p.AddComponent<Pickup>();
