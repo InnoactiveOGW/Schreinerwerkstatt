@@ -180,13 +180,18 @@ public class Saw : MonoBehaviour {
     }
 
 	void cutObject(GameObject cuttee, Collision collision){
-		Material capMaterial = defaultCapMaterial;
+        lastCutTimer = 0;
+        Material capMaterial = defaultCapMaterial;
 		Vector3 tempScale = cuttee.transform.localScale;
 		Vector3 tempPosition = cuttee.transform.position;
 		ToolUser1 tu = FindObjectOfType<ToolUser1>();
 
 		string preCutTag = cuttee.tag;
         Vector3 cutterPosition = initialContactPoint; // - new Vector3(0, 1, 0);
+
+        // TODO: initialRotation should be oriented towards the nearest glue if the object has already been glue to another object
+
+
 		GameObject[] pieces = tu.cut(cutterPosition, initialRotation, cuttee);
 		foreach (var p in pieces)
 		{
@@ -237,7 +242,7 @@ public class Saw : MonoBehaviour {
 
     void endSawingMode() {
         isSawing = false;
-        lastCutTimer = 0;
+        
         setCutteRigidbody();
 
         Pickup pu = parentTransform.gameObject.GetComponent<Pickup>();

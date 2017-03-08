@@ -20,9 +20,6 @@ public class GameController : MonoBehaviour {
         CheckandShowHelper();
 	}
 
-
-
-
     private void CheckandShowHelper()
     {
         if (currentLevel == null)
@@ -126,15 +123,5 @@ public class GameController : MonoBehaviour {
     public LevelControllerInterface getCurrentLevel()
     {
         return currentLevel;
-    }
-
-    public string finishLevel(GameObject finishedObject)
-    {
-        float score = currentLevel.evaluateConstruction(finishedObject);
-        
-        Debug.Log(score);
-
-        return score.ToString();
-        // evaluateConstruction
     }
 }
