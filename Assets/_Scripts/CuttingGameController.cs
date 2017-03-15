@@ -25,12 +25,6 @@ public class CuttingGameController : GameController {
         txtScore = scoreCounter.GetComponent<TextMesh>();
         txtMiss = missCounter.GetComponent<TextMesh>();
     }
-	
-	// Update is called once per frame
-	void Update () {
-        //if (miss >= 3)
-        //    playing = false;
-	}
 
     public void addScore(int newScore) {
         score += newScore;
@@ -51,6 +45,4 @@ public class CuttingGameController : GameController {
         txtMiss.text = miss.ToString();
         playing = true;
     }
-
-
 }

@@ -5,15 +5,6 @@ public class LevelControllerInterface : MonoBehaviour {
 
 
     public int LevelNumber = 0;
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
 
     public virtual void startLevel()
     {
@@ -24,20 +15,14 @@ public class LevelControllerInterface : MonoBehaviour {
     }
 
     public virtual void resetLevel()
-    {
-
-    }
+    {}
 
     public virtual void endLevel()
-    {
-
-
-    }
+    {}
 
     public virtual float evaluateConstruction(GameObject go)
     {
         // -1 indicates that the evaluation couldn't be completed
         return -1;
     }
-
 }

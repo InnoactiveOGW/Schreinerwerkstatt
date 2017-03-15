@@ -4,25 +4,16 @@ using System;
 
 public class PencilDraw : Pickup
 {
-
     bool painting = false;
     Texture2D tex;
     Renderer paintRender;
 	GameObject paintedWood;
 
-    // Use this for initialization
-    void Start()
-    {
-
-    }
-
     // Update is called once per frame
     void Update()
     {
-
         if (painting && paintRender != null)
         {
-
             RaycastHit hit;
             if (!Physics.Raycast(this.gameObject.transform.position,
                 -this.gameObject.transform.forward,
@@ -51,9 +42,7 @@ public class PencilDraw : Pickup
 			Debug.Log ("x: " +  pixelUV.y);
 
             tex.SetPixel(Mathf.FloorToInt(pixelUV.x), Mathf.FloorToInt(pixelUV.y), Color.black);
-
             tex.Apply();
-
             if (paintRender != null) paintRender.material.SetTexture("_MainTex", tex);
         }
     }
@@ -98,8 +87,5 @@ public class PencilDraw : Pickup
 			paintedWood = null;
 		}
     }
-
-    //TODO 
-    // eventuall kann man auch raycast länge als exit benutzen
 }
 

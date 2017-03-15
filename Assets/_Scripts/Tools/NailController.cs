@@ -24,13 +24,8 @@ public class NailController : MonoBehaviour {
             Rigidbody woodRB = collision.gameObject.GetComponent<Rigidbody>();
             if (woodRB != null)
             {
-                // oldMass = woodRB.mass;
-                // woodRB.mass = 1000;
                 woodRB.constraints = RigidbodyConstraints.FreezeAll;
                 woodRB.isKinematic = true;
-                //woodRB.constraints = RigidbodyConstraints.FreezePosition;
-                //woodRB.constraints = RigidbodyConstraints.FreezeRotationY;
-                //woodRB.constraints = RigidbodyConstraints.FreezeRotationZ;
             }
         }
     }
@@ -56,19 +51,7 @@ public class NailController : MonoBehaviour {
     {
         if (preventProgress)
             return;
-
         transform.position = transform.position - transform.up * force * 0.001f;
-
-        //Debug.Log("pinning nail to wood");
-        //foreach (GameObject wood in woods) {
-        //    wood.transform.SetParent(null);
-        //}
-        //// old: transform.position = transform.position - transform.up * force * 0.001f;
-        ////Pickup parentPickup = parent.GetComponent<Pickup>();
-        ////parentPickup.GetReleased();
-
-        // TODO
-
         foreach (GameObject wood in woods)
         {
             if(wood.transform.parent != parent)
@@ -78,23 +61,11 @@ public class NailController : MonoBehaviour {
 
     public virtual void getPinnedToWood(Vector3 velocity, Vector3 hammerPosition)
     {
-        float force = velocity.magnitude;
-
         if (preventProgress)
             return;
 
+        float force = velocity.magnitude;
         transform.position = transform.position - transform.up * force * 0.001f;
-
-        //Debug.Log("pinning nail to wood");
-        //foreach (GameObject wood in woods) {
-        //    wood.transform.SetParent(null);
-        //}
-        //// old: transform.position = transform.position - transform.up * force * 0.001f;
-        ////Pickup parentPickup = parent.GetComponent<Pickup>();
-        ////parentPickup.GetReleased();
-
-        // TODO
-
         foreach (GameObject wood in woods)
         {
             if (wood.transform.parent != parent)

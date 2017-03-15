@@ -1,14 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 
 public class TestNailController : NailController {
-
-    //public Transform parent;
-    //public bool canBeNailed = false;
-    //public bool preventProgress = false;
-    //public List<GameObject> woods = null;
-
     bool firstHit = true;
     static System.Random rnd = new System.Random();
     Transform modBone;
@@ -21,7 +14,6 @@ public class TestNailController : NailController {
     public Color targetColor;
     public Color colorDelta;
     public bool changeColor = false;
-
     public float score = 0;
 
 
@@ -52,7 +44,6 @@ public class TestNailController : NailController {
 
     public void explode()
     {
-        // TODO
         Debug.Log("nail exploded");
         preventProgress = true;
         Rigidbody rb = GetComponent<Rigidbody>();
@@ -80,7 +71,6 @@ public class TestNailController : NailController {
             {
                 rb.isKinematic = true;
             }
-
             setNewColor(noScoreColor);
         }
     }
@@ -112,9 +102,6 @@ public class TestNailController : NailController {
             Rigidbody rb = gameObject.GetComponent<Rigidbody>();
             if(rb != null) {
                 rb.isKinematic = false;
-            //    woodRB.mass = oldMass;
-            //    woodRB.constraints = RigidbodyConstraints.None;
-            //    woodRB.isKinematic = false;
             }
             woods.Remove(collision.gameObject);
             if (woods.Count == 0)
@@ -127,26 +114,22 @@ public class TestNailController : NailController {
 
     public override void getPinnedToWood(Vector3 velocity, Vector3 hammerPosition)
     {
-        float force = velocity.magnitude;
-
         if (preventProgress) {
             Debug.Log("Nail cant progess anymore");
             return;
         }
-
         if (!canBeNailed)
             return;
 
+        float force = velocity.magnitude;
         float dot = Vector3.Dot(-transform.up.normalized, velocity.normalized);
         Debug.Log("Piined Dot Product: " + dot);
         if (dot < 0.93)
         {
             float velocityFactor = 5;
-
             float cosX = Vector3.Dot(transform.right, velocity) * velocityFactor;
             float cosY = Vector3.Dot(transform.up, velocity) * velocityFactor;
             float cosZ = Vector3.Dot(transform.forward, velocity) * velocityFactor;
-
             modBone.Rotate(new Vector3(-cosZ, -cosY, -cosX));
             dot = (dot / 2) * velocity.sqrMagnitude;
             score = score - dot > 0 ? score - dot : 0;
@@ -154,21 +137,17 @@ public class TestNailController : NailController {
         else
         {
             float addScore = dot * force;
-
             CuttingGameController cgc = FindObjectOfType<CuttingGameController>();
             if (cgc != null)
             {
                 cgc.score -= Mathf.RoundToInt(score);
             }
-
             score = score + addScore;
             if (cgc != null)
             {
                 cgc.addScore(Mathf.RoundToInt(score));
             }
             transform.position = transform.position - transform.up * force * dot * 0.01f;
-
-            
         }
 
         Color newDelta = (bestScoreColor - noScoreColor) * score / 15;
@@ -200,21 +179,5 @@ public class TestNailController : NailController {
             }
             firstHit = false;
         }
-
-        //Debug.Log("pinning nail to wood");
-        //foreach (GameObject wood in woods) {
-        //    wood.transform.SetParent(null);
-        //}
-        //// old: transform.position = transform.position - transform.up * force * 0.001f;
-        ////Pickup parentPickup = parent.GetComponent<Pickup>();
-        ////parentPickup.GetReleased();
-
-        // TODO
-
-        //foreach (GameObject wood in woods)
-        //{
-        //    if(wood.transform.parent != parent)
-        //        wood.transform.SetParent(parent);
-        //}
     }
 }

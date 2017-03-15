@@ -9,14 +9,9 @@ public class GameController : MonoBehaviour {
     public int progress = 0;
     public int oldProgress = 0;
     public GameObject[] Hints;
-    // Use this for initialization
-    void Start () {
-	    // TODO
-	}
 	
 	// Update is called once per frame
-	void Update () {
-        // TODO
+	void FixedUpdate () {
         CheckandShowHelper();
 	}
 

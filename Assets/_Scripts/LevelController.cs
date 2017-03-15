@@ -39,7 +39,6 @@ public class LevelController : LevelControllerInterface{
             toolRotations.Add(tool.name, tool.transform.rotation);
         }
     }
-	
 
     void OnTriggerEnter(Collider collider)
     {
@@ -114,7 +113,6 @@ public class LevelController : LevelControllerInterface{
 
     private void cleanupLevel1()
     {
-        // TODO
         GameObject[] wood = GameObject.FindGameObjectsWithTag("Wood");
         foreach (GameObject w in wood)
             Destroy(w);
@@ -122,19 +120,5 @@ public class LevelController : LevelControllerInterface{
         GameObject[] glue = GameObject.FindGameObjectsWithTag("Glue");
         foreach (GameObject g in glue)
             Destroy(g);
-
-        //GameObject[] tools = GameObject.FindGameObjectsWithTag("Tool");
-        //foreach (GameObject t in tools)
-        //    Destroy(t.gameObject);
-        //foreach(GameObject tool in this.tools)
-        //{
-        //    Instantiate(tool);
-        //}
-
-        //GameObject[] blueprint = GameObject.FindGameObjectsWithTag("Blueprint");
-        //foreach (GameObject bp in blueprint)
-        //{
-        //    Destroy(bp);
-        //}
     }
 }

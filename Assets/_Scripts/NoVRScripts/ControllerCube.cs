@@ -49,8 +49,9 @@ public class ControllerCube : MonoBehaviour {
         {
             triggerButton = controller.GetPressDown(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger);
             gripButton = controller.GetPressUp(Valve.VR.EVRButtonId.k_EButton_Grip);
-                
-            if (pickedObject == null && triggerButton )
+        }
+
+        if (pickedObject == null && (triggerButton || Input.GetMouseButtonDown(0)))
             {
                 if (selectedObject != null && selectedObject is Pickup)
                 {
@@ -59,15 +60,7 @@ public class ControllerCube : MonoBehaviour {
                     if (rb)
                     {
                         rb.constraints = RigidbodyConstraints.FreezeAll;
-                        // rb.useGravity = false;
                     }
-
-                    //if (selectedObject.tag == "Tool")
-                    //{
-                    //    pickedObject.transform.position = this.gameObject.transform.position;
-                    //    pickedObject.transform.rotation = this.gameObject.transform.rotation;
-                    //}
-                    //handAnimation.CrossFade("GrabEmpty");
                 }
                 else if (selectedObject != null)
                 {
@@ -91,8 +84,6 @@ public class ControllerCube : MonoBehaviour {
                 handAnimation.CrossFade("ReverseGrabEmpty");
                 return;
             }
-           
-        }
         else {
             if (Input.GetAxis("Mouse ScrollWheel") > 0)
             {
@@ -104,108 +95,6 @@ public class ControllerCube : MonoBehaviour {
                 Vector3 direction = gameObject.transform.position - gameObject.transform.parent.position;
                 gameObject.transform.position -= direction * 0.1f;
             }
-        }
-
-        // deprecated / non-VR Code, needs cleanup
-
-		if (pickedObject == null && Input.GetMouseButtonDown(0))
-        {
-            if(selectedObject != null)
-            {
-                if (selectedObject is Pickup) {
-                    (selectedObject as Pickup).GetPickedUp(gameObject, out pickedObject);
-                    Rigidbody rb = pickedObject.GetComponent<Rigidbody>();
-                    if (rb)
-                    {
-                        rb.constraints = RigidbodyConstraints.FreezeAll;
-                        // rb.useGravity = false;
-                    }
-                    if(selectedObject.tag == "Tool")
-                    {
-                        pickedObject.transform.position = this.gameObject.transform.position;
-                        pickedObject.transform.rotation = this.gameObject.transform.rotation;
-                    }
-                } else
-                {
-                    selectedObject.interact(this.gameObject);
-                }
-                return;
-            }
-
-            handAnimation.CrossFade("GrabEmpty");
-            
-            Collider[] pickups = Physics.OverlapSphere(transform.position, pickupRadius);
-            if (pickups != null)
-            {
-                Collider nearestCollider = null;
-                float minDis = pickupRadius;
-                foreach (Collider collider in pickups)
-                {
-                    var currDis = Vector3.Distance(collider.transform.position, transform.position);
-                    Pickup pickup = collider.GetComponent<Pickup>();
-                    if (currDis < minDis && pickup != null)
-                    {
-                        minDis = currDis;
-                        nearestCollider = collider;
-                    }
-                }
-
-                if (nearestCollider)
-                {
-                    WoodCreator wc = nearestCollider.GetComponent<WoodCreator>();
-                    if (wc != null)
-                    {
-                        wc.createNewWood();
-                        Renderer wcRend = wc.gameObject.GetComponent<Renderer>();
-                        Material wcMat = wcRend.material;
-                        wcMat.color = new Color(Random.value, Random.value, Random.value);
-                        return;
-                    }
-
-                    Tool tool = nearestCollider.GetComponent<Tool>();
-                    Pickup pickup = null;
-                    if (tool == null)
-                    {
-                        pickup = nearestCollider.GetComponent<Pickup>();
-                        if (pickup)
-                        {
-                            pickup.GetPickedUp(gameObject);
-                            Rigidbody rb = pickup.GetComponent<Rigidbody>();
-                            if (rb)
-                            {
-                                rb.constraints = RigidbodyConstraints.FreezeAll;
-                                // rb.useGravity = false;
-                            }
-                            pickedObject = pickup;
-                        }
-                    }
-                    else
-                    {
-                        tool.GetPickedUp(gameObject);
-                        tool.transform.rotation = transform.rotation;
-                        tool.transform.localPosition = new Vector3(0, 0, 0);
-                        Rigidbody rb = tool.GetComponent<Rigidbody>();
-                        if (rb)
-                        {
-                            rb.constraints = RigidbodyConstraints.FreezeAll;
-                            //rb.useGravity = false;
-                        }
-                        pickedObject = tool;
-                    }
-                }
-            }
-            handAnimation.CrossFadeQueued("ReverseGrabEmpty");
-        }
-		else if (pickedObject != null && Input.GetMouseButtonDown(1)) {
-            
-            Rigidbody rb = pickedObject.GetComponent<Rigidbody>();
-            if (rb)
-            {
-                rb.constraints = RigidbodyConstraints.None;
-            }
-            pickedObject.GetReleased(new Vector3(0, 0, 0));
-            pickedObject = null;
-            handAnimation.CrossFadeQueued("ReverseGrabEmpty");
         }
 
         if (changeColor && colorDelta != null)
@@ -223,7 +112,6 @@ public class ControllerCube : MonoBehaviour {
             return;
         Interactable p = collider.gameObject.GetComponent<Interactable>();
         if(p != null) {
-            // Debug.Log("Found interactable");
             colorDelta = activeColor - currentMaterial.color;
             changeColor = true;
             targetColor = activeColor;

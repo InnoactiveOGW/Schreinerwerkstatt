@@ -25,16 +25,6 @@ public class Lightsaber : MonoBehaviour {
         if (triggerButton)
         {
             activated = !activated;
-            //if (!activated)
-            //{
-            //    Destroy(model);
-            //    Destroy(blade);
-            //}
-            //else
-            //{
-            //    model = Instantiate(modelPrefab);
-            //    blade = Instantiate(bladePrefab);
-            //}
             if (activated)
             {
                 model.SetActive(true);
@@ -54,7 +44,6 @@ public class Lightsaber : MonoBehaviour {
         {
             SteamVR_Controller.Device controller = SteamVR_Controller.Input((int)inputDevice.index);
             return controller;
-            //return controller.GetPressDown(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger);
         }
         return null;
     }

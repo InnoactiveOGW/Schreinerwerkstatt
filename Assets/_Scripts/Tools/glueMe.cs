@@ -4,12 +4,10 @@ using System.Collections.Generic;
 
 public class glueMe : MonoBehaviour
 {
-
     private void OnTriggerEnter(Collider collider)
     {
         if (collider.gameObject.tag == "Wood")
         {
-            //ContactPoint contact = collision.contacts[0];
             GameObject collidedObject = collider.gameObject;
             if (this.gameObject.transform.parent == null)
             {
@@ -20,9 +18,6 @@ public class glueMe : MonoBehaviour
                 }
                 this.gameObject.transform.rotation = collidedObject.transform.rotation;
 				this.gameObject.transform.position += transform.up * 0.028f; 
-                //Rigidbody rigi = this.gameObject.GetComponent<Rigidbody>();
-                //rigi.constraints = RigidbodyConstraints.FreezeAll;
-                //rigi.freezeRotation = true;
                 this.transform.SetParent(collidedObject.transform);
             }
             else if(collidedObject.transform.parent != transform.parent && collidedObject.transform != transform.parent)
@@ -37,13 +32,8 @@ public class glueMe : MonoBehaviour
                 if (rbWood != null)
                 {
                     Destroy(rbWood);
-                    //rbWood.constraints = RigidbodyConstraints.FreezeAll;
-                    //rbWood.freezeRotation = true;
                 }
                 collidedObject.tag = "GluedWood";
-
-                // combineColliderWithParent(collider.gameObject);
-
             }
         }
     }

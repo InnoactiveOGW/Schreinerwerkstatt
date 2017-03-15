@@ -66,8 +66,6 @@ using UnityEngine;
     //strength: vibration strength from 0-1
     public void StartComplexHapticPattern(SteamVR_Controller.Device device, float strength, int vibrationCount, float vibrationLength, float gapLength, float length)
     {
-
-        // TODO
         strength = Mathf.Clamp01(strength);
         for (int i = 0; i < vibrationCount; i++)
         {

@@ -14,12 +14,18 @@ public class FinishPlatform : MonoBehaviour {
     }
     void OnTriggerEnter(Collider collider)
     {
-        finish(collider.gameObject);
+        if (collider.gameObject.tag == "Wood")
+        {
+            finish(collider.gameObject);
+        }
     }
 
     void OnCollisionEnter(Collision collision)
     {
-        finish(collision.gameObject);
+        if (collision.gameObject.tag == "Wood")
+        {
+            finish(collision.gameObject);
+        }
     }
 
     void finish(GameObject finishedObj)

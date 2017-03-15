@@ -2,9 +2,6 @@
 using System.Collections;
 
 public class DestroyWood : MonoBehaviour {
-
-
-
     void OnTriggerEnter(Collider collider) {
         //GameObject collider = collision.gameObject;
         if (collider.tag == "WoodCubeCut")
@@ -36,5 +33,4 @@ public class DestroyWood : MonoBehaviour {
             Destroy(collider.gameObject);
         }
     }
-
 }

@@ -13,7 +13,6 @@ public class Saw : MonoBehaviour {
 
     bool isSawing = false;
     public bool triggerEntered = false;
-    Divider wood = null;
     GameObject oldParent = null;
     Vector3 oldPositionToParent;
     Quaternion oldRotationToParent;
@@ -121,7 +120,6 @@ public class Saw : MonoBehaviour {
 					Debug.Log ("could not find Your Hand i want to saw dude");
 					return;
 				}
-
                 if (Vector3.Dot((contact.point - transform.position).normalized, -transform.forward) < 0) {
                     Debug.Log("Hit wood at the wrong side => no sawing mode");
                     return;
@@ -137,7 +135,6 @@ public class Saw : MonoBehaviour {
 				Rigidbody rb = cuttee.GetComponent<Rigidbody> ();
                 if(rb != null)
 				    rb.isKinematic = true;
-
 				enterSawingMode();
             }
         }
@@ -151,7 +148,6 @@ public class Saw : MonoBehaviour {
     {
         foreach (ContactPoint contact in collisionInfo.contacts)
         {
-            // Debug.DrawRay(contact.point, contact.normal * 10, Color.white);
             if (isSawing) {
                 Debug.DrawRay(contact.point, contact.normal * 10, Color.white);
             }
@@ -188,7 +184,7 @@ public class Saw : MonoBehaviour {
 		ToolUser1 tu = FindObjectOfType<ToolUser1>();
 
 		string preCutTag = cuttee.tag;
-        Vector3 cutterPosition = initialContactPoint; // - new Vector3(0, 1, 0);
+        Vector3 cutterPosition = initialContactPoint;
 
         // TODO: initialRotation should be oriented towards the nearest glue if the object has already been glue to another object
         // only relevant when the object is glued to another one, needs more work before it can be implemented correctly
@@ -302,12 +298,5 @@ public class Saw : MonoBehaviour {
         oldPositionToParent = parentTransform.localPosition;
         oldRotationToParent = parentTransform.localRotation;
         parentTransform.parent = null;
-
-        //Pickup pu = parentTransform.gameObject.GetComponent<Pickup>();
-        //if(pu != null)
-        //{
-        //    pu.gameObject.transform.parent = null;
-        //}
-        //Debug.Log("sawing mode entered");
     }
 }

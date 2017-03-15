@@ -12,13 +12,6 @@ public class Radio : Interactable
         audioClip = GetComponent<AudioSource>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-
     public override void interact(GameObject interactionGO)
     {
         if (audioClip.isPlaying)
@@ -29,6 +22,5 @@ public class Radio : Interactable
         {
             audioClip.Play();
         }
-
     }
 }

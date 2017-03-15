@@ -11,12 +11,6 @@ public class ResetButton : Interactable {
         audioClip = GetComponent<AudioSource>();
     }
 
-
-    // Update is called once per frame
-    void Update () {
-	
-	}
-
     public override void interact(GameObject interactionGO)
     {
         audioClip.Play();

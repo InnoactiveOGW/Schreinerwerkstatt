@@ -15,7 +15,6 @@ public class LaserBlade : MonoBehaviour {
     public Material defaultCapMaterial;
     GameObject blade;
     bool isSawing = false;
-    Divider wood = null;
     GameObject oldParent = null;
     public float power = 0.0005f;
     public float movementDelay = 0.005f;
@@ -70,13 +69,6 @@ public class LaserBlade : MonoBehaviour {
                 cuttee = collision.gameObject;
                 hitCount++;
                 thisCollider.isTrigger = true;
-
-                //var newGO = new GameObject();
-                //newGO.transform.position = transform.position;
-                //newGO.transform.LookAt(initialContactPoint, transform.up);
-                //newGO.transform.SetParent(cuttee.transform);
-                //newGO.tag = "BladePosition";
-
                 break;
             }
         }
@@ -106,9 +98,8 @@ public class LaserBlade : MonoBehaviour {
 		ToolUser1 tu = FindObjectOfType<ToolUser1>();
 		string preCutTag = cuttee.tag;
         Vector3 cutterPosition = initialContactPoint; // - new Vector3(0, 1, 0);
-        
-        tu.transform.LookAt(transform.position, transform.up);
 
+        tu.transform.LookAt(transform.position, transform.up);
         GameObject[] pieces = tu.cut(cuttee);
 
         if(pieces.Length == 1)
