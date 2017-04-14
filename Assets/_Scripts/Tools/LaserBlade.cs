@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class LaserBlade : MonoBehaviour {
 
@@ -9,18 +10,18 @@ public class LaserBlade : MonoBehaviour {
     Quaternion initialRotation;
     Vector3 initialRightVector;
     GameObject cuttee;
+    List<GameObject> cuttees;
+
     public Material defaultCapMaterial;
     GameObject blade;
-
     bool isSawing = false;
-    Divider wood = null;
     GameObject oldParent = null;
-    //ToolUser blade;
-    //new Rigidbody rigidbody;
     public float power = 0.0005f;
     public float movementDelay = 0.005f;
-
     public Transform parentTransform;
+
+    int hitCount = 0;
+    CapsuleCollider thisCollider;
 
     //Audio
     AudioSource sawForward;
@@ -35,18 +36,20 @@ public class LaserBlade : MonoBehaviour {
             sawForward = audio[0];
             sawBack = audio[1];
         }
+        thisCollider = GetComponent<CapsuleCollider>();
+        cuttee = null;
     }
 	
 	// Update is called once per frame
-	void FixedUpdate () {
-
+	void Update () {
+        if (hitCount > 0 && cuttee == null) { 
+            hitCount = 0;
+            thisCollider.isTrigger = false;
+        }
     }
 
     public void OnCollisionEnter(Collision collision)
     {
-        
-
-
         if (!collision.gameObject.tag.Contains("Wood") 
             || collision.gameObject.tag == "WoodCubeCut" 
             || cuttee != null)
@@ -54,7 +57,6 @@ public class LaserBlade : MonoBehaviour {
 
         foreach (ContactPoint contact in collision.contacts)
         {
-            //wood = collision.gameObject.GetComponent<Divider>();
             if (contact.otherCollider == collision.collider)
             {
                 initialContactPoint = contact.point;
@@ -65,8 +67,8 @@ public class LaserBlade : MonoBehaviour {
                 initialRightVector = collision.gameObject.transform.rotation * this.gameObject.transform.right; // this.gameObject.transform.rotation * 
                 Debug.Log("initialContactPoint: " + initialContactPoint.ToString());
                 cuttee = collision.gameObject;
-                Rigidbody rb = cuttee.GetComponent<Rigidbody>();
-                rb.isKinematic = true;
+                hitCount++;
+                thisCollider.isTrigger = true;
                 break;
             }
         }
@@ -74,15 +76,6 @@ public class LaserBlade : MonoBehaviour {
         ToolUser1 tu = GetComponentInChildren<ToolUser1>();
         if (tu != null)
         {
-            // tu.transform.LookAt(cuttee.transform.position);
-            Vector3 ab = initialContactPoint + gameObject.transform.up;
-            Vector3 ap = initialContactPoint;
-
-
-            Vector3 projectedConPoint = Vector3.Dot(ap, ab) / Vector3.Dot(ab, ab) * ab;
-
-            // tu.transform.LookAt(projectedConPoint);
-            // tu.transform.up = initialUpVector;
             tu.transform.SetParent(null);
             tu.transform.position = initialContactPoint;
         }
@@ -90,13 +83,14 @@ public class LaserBlade : MonoBehaviour {
 
     int tempLength = 0;
 
-    public void OnCollisionExit(Collision collision)
+    public void OnTriggerExit(Collider collider)
     {
         if (cuttee != null)
         {
-
 			cutObject (cuttee);
             cuttee = null;
+            hitCount--;
+            thisCollider.isTrigger = false;
         }
     }
 
@@ -104,8 +98,15 @@ public class LaserBlade : MonoBehaviour {
 		ToolUser1 tu = FindObjectOfType<ToolUser1>();
 		string preCutTag = cuttee.tag;
         Vector3 cutterPosition = initialContactPoint; // - new Vector3(0, 1, 0);
+
         tu.transform.LookAt(transform.position, transform.up);
         GameObject[] pieces = tu.cut(cuttee);
+
+        if(pieces.Length == 1)
+        {
+            tu.transform.LookAt(cuttee.transform.position, transform.up);
+            pieces = tu.cut(cuttee);
+        }
 
         foreach (var p in pieces)
 		{
@@ -117,33 +118,15 @@ public class LaserBlade : MonoBehaviour {
             BoxCollider[] mcs = p.GetComponents<BoxCollider>();
 			foreach(BoxCollider collider in mcs)
 			{
-                //Destroy(mc);
                 collider.isTrigger = true;
-				//MeshFilter meshfilter = mc.GetComponent<MeshFilter>();
-				//Mesh mesh = meshfilter.mesh;
-				//mc.sharedMesh = mesh;
 			}
             if (mcs.Length == 0)
             {
                 BoxCollider bc = p.AddComponent<BoxCollider>();
                 bc.isTrigger = true;
-
-                //	MeshCollider newMC = p.AddComponent<MeshCollider>();
-                //	newMC.convex = true;
-                //	newMC.sharedMesh = p.GetComponent<MeshFilter>().mesh;
-
-                //	MeshCollider triggerMeshCollider = p.AddComponent<MeshCollider>();
-                //	triggerMeshCollider.convex = true;
-                //	triggerMeshCollider.isTrigger = true;
-
-
             }
 
-
-
             Rigidbody rb = p.GetComponent<Rigidbody>();
-            //if (rb != null)
-            //    Destroy(rb);
             if (rb == null) { 
                 Rigidbody rbNew = p.AddComponent<Rigidbody>();
                 rbNew.isKinematic = false;
@@ -156,5 +139,4 @@ public class LaserBlade : MonoBehaviour {
         tu.transform.localPosition = new Vector3(0, 0, 0);
         tu.transform.localRotation = new Quaternion(0, 0, 0, 1);
     }
-    
 }

@@ -10,7 +10,6 @@ public class Hammer : MonoBehaviour {
         {
             SteamVR_Controller.Device controller = SteamVR_Controller.Input((int)inputDevice.index);
             return controller;
-            //return controller.GetPressDown(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger);
         }
         return null;
     }

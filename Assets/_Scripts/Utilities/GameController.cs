@@ -9,19 +9,11 @@ public class GameController : MonoBehaviour {
     public int progress = 0;
     public int oldProgress = 0;
     public GameObject[] Hints;
-    // Use this for initialization
-    void Start () {
-	    // TODO
-	}
 	
 	// Update is called once per frame
-	void Update () {
-        // TODO
+	void FixedUpdate () {
         CheckandShowHelper();
 	}
-
-
-
 
     private void CheckandShowHelper()
     {
@@ -51,19 +43,19 @@ public class GameController : MonoBehaviour {
                 progress = 1;
                 break;
             case 1:
-                if (CheckIfTagIsPickedUp("Measure"))
+                if (CheckIfNameIsPickedUp("MeasureTape"))
                     progress = 2;
                 break;
             case 2:
-                if (CheckIfTagIsPickedUp("Pencil"))
+                if (CheckIfNameIsPickedUp("Pencil"))
                     progress = 3;
                 break;
             case 3:
-                if (CheckIfTagIsPickedUp("Saw"))
+                if (CheckIfNameIsPickedUp("Saw"))
                     progress = 4;
                 break;
             case 4:
-                if (CheckIfTagIsPickedUp("Glue"))
+                if (CheckIfNameIsPickedUp("Gluetube"))
                     progress = 5;
                 break;
         }
@@ -75,16 +67,18 @@ public class GameController : MonoBehaviour {
 
     }
 
-    private bool CheckIfTagIsPickedUp(string tag)
+    private bool CheckIfNameIsPickedUp(string name)
     {
-        GameObject[] foundGameobjects = GameObject.FindGameObjectsWithTag(tag);
+        GameObject[] foundGameobjects = GameObject.FindGameObjectsWithTag("Tool");
         bool any = false;
         foreach (GameObject gamObj in foundGameobjects)
         {
-
-            Pickup pick = gamObj.GetComponent<Pickup>();
-            if (pick != null && pick.isPickedup)
-                any = true;
+            if(gamObj.name == name)
+            {
+                Pickup pick = gamObj.GetComponent<Pickup>();
+                if (pick != null && pick.isPickedup)
+                    any = true;
+            }
         }
         return any;
     }
@@ -126,15 +120,5 @@ public class GameController : MonoBehaviour {
     public LevelControllerInterface getCurrentLevel()
     {
         return currentLevel;
-    }
-
-    public string finishLevel(GameObject finishedObject)
-    {
-        float score = currentLevel.evaluateConstruction(finishedObject);
-        
-        Debug.Log(score);
-
-        return score.ToString();
-        // evaluateConstruction
     }
 }

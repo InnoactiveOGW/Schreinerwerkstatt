@@ -1,59 +1,71 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class glueMe : MonoBehaviour
 {
-
-    // Use this for initialization
-    void Start()
+    private void OnTriggerEnter(Collider collider)
     {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.tag == "Wood")
+        if (collider.gameObject.tag == "Wood")
         {
-			if (collision.contacts.Length > 0) {
-				ContactPoint contact = collision.contacts [0];
-			
-                if (this.gameObject.transform.parent == null)
+            GameObject collidedObject = collider.gameObject;
+            if (this.gameObject.transform.parent == null)
+            {
+                Rigidbody rigi = this.gameObject.GetComponent<Rigidbody>();
+                if (rigi != null)
                 {
-                    //FixedJoint joint = this.gameObject.AddComponent<FixedJoint>();
-                    this.gameObject.transform.rotation = collision.gameObject.transform.rotation;
-					this.gameObject.transform.position = contact.point - collision.transform.up * 0.01f; 
-                    Rigidbody rigi = this.gameObject.GetComponent<Rigidbody>();
-                    rigi.constraints = RigidbodyConstraints.FreezeAll;
-                    Rigidbody rbWood = collision.gameObject.GetComponent<Rigidbody>();
-                    if(rbWood != null)
-                    {
-                        rbWood.constraints = RigidbodyConstraints.FreezeAll;
-						rbWood.isKinematic = true;
-						rbWood.useGravity = false;
-                    }
-                    //   rigi.isKinematic = true;
-                    this.transform.SetParent(collision.gameObject.transform);
+                    Destroy(rigi);
                 }
-                else
-                {
-                    Pickup pu = collision.gameObject.GetComponent<Pickup>();
-                    if (pu != null)
-                        pu.GetReleased();
-
-                    collision.gameObject.transform.SetParent(this.gameObject.transform.parent);
-                }
-
-                // joint.connectedBody = collision.gameObject.GetComponent<Rigidbody>();
-
-                return;
+                this.gameObject.transform.rotation = collidedObject.transform.rotation;
+				this.gameObject.transform.position += transform.up * 0.028f; 
+                this.transform.SetParent(collidedObject.transform);
             }
-		}
+            else if(collidedObject.transform.parent != transform.parent && collidedObject.transform != transform.parent)
+            {
+                Pickup pu = collidedObject.GetComponent<Pickup>();
+                if (pu != null)
+                    pu.GetReleased();
+
+                collidedObject.transform.SetParent(this.gameObject.transform.parent);
+
+                Rigidbody rbWood = collidedObject.GetComponent<Rigidbody>();
+                if (rbWood != null)
+                {
+                    Destroy(rbWood);
+                }
+                collidedObject.tag = "GluedWood";
+            }
+        }
+    }
+
+    /// <summary>
+    /// experiemental!
+    /// </summary>
+    /// <param name="collidingGO"></param>
+    void combineColliderWithParent(GameObject collidingGO)
+    {
+        
+        MeshFilter parentMF = transform.parent.gameObject.GetComponent<MeshFilter>();
+        MeshFilter toCombineMF = collidingGO.GetComponent<MeshFilter>();
+        if(parentMF != null && toCombineMF != null)
+        {
+            List<MeshFilter> mfList = new List<MeshFilter>();
+            mfList.Add(parentMF);
+            mfList.Add(toCombineMF);
+
+            CombineInstance[] combine = new CombineInstance[mfList.Count];
+            int i = 0;
+            while (i < mfList.Count)
+            {
+                combine[i].mesh = mfList[i].sharedMesh;
+                combine[i].transform = mfList[i].transform.localToWorldMatrix;
+                mfList[i].gameObject.SetActive(false);
+                i++;
+            }
+            parentMF.mesh = new Mesh();
+            parentMF.mesh.CombineMeshes(combine);
+            parentMF.gameObject.SetActive(true);
+        }
     }
 
 }

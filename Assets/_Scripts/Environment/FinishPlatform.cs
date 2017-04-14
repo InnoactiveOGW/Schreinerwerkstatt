@@ -14,12 +14,28 @@ public class FinishPlatform : MonoBehaviour {
     }
     void OnTriggerEnter(Collider collider)
     {
-        if(collider.gameObject.tag == "Wood")
+        if (collider.gameObject.tag == "Wood")
         {
-            GameController gc = FindObjectOfType<GameController>();
-            scoreText.text =  gc.finishLevel(collider.gameObject);
+            finish(collider.gameObject);
+        }
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Wood")
+        {
+            finish(collision.gameObject);
+        }
+    }
+
+    void finish(GameObject finishedObj)
+    {
+        EvaluationCtrl evalC = finishedObj.GetComponent<EvaluationCtrl>();
+        if (evalC != null)
+        {
+            scoreText.text = evalC.rate().ToString("F1");
             particle.Play();
-            Destroy(collider.gameObject);
+            Destroy(evalC.gameObject);
         }
     }
 }

@@ -12,14 +12,20 @@ public class Saw : MonoBehaviour {
     GameObject blade;
 
     bool isSawing = false;
-    Divider wood = null;
+    public bool triggerEntered = false;
     GameObject oldParent = null;
-    //ToolUser blade;
-    //new Rigidbody rigidbody;
+    Vector3 oldPositionToParent;
+    Quaternion oldRotationToParent;
+
     public float power = 0.0005f;
     public float movementDelay = 0.005f;
 
-    public Transform parentTransform;
+    float lastCutTimer;
+
+    [SerializeField]
+    float cutDelay;
+
+    Transform parentTransform;
 
     //Audio
     AudioSource sawForward;
@@ -28,6 +34,8 @@ public class Saw : MonoBehaviour {
     // Use this for initialization
     void Start () {
         parentTransform = gameObject.transform.parent.transform;
+        lastCutTimer = cutDelay;
+
         AudioSource[] audio = GetComponents<AudioSource>();
         if (audio.Length > 1)
         {
@@ -38,8 +46,9 @@ public class Saw : MonoBehaviour {
 	
 	// Update is called once per frame
 	void FixedUpdate () {
-		if (isSawing) {
-			Transform t = gameObject.transform.parent.transform;
+        Pickup parent = parentTransform.GetComponent<Pickup>();
+        if (isSawing && parent != null && parent.isPickedup) {
+			Transform t = parentTransform;
 			if (!Config.isVR) {
 				if (Input.GetKey ("r")) {
                     sawForward.Play();
@@ -53,57 +62,64 @@ public class Saw : MonoBehaviour {
 				SteamVR_TrackedObject inputDevice = oldParent.GetComponentInParent<SteamVR_TrackedObject> ();
 				SteamVR_Controller.Device controller = SteamVR_Controller.Input ((int)inputDevice.index);
 
+
 				// if (controller != null && Mathf.Abs(controller.velocity.z) > 0.3)
 				if (controller != null) {
 					Vector3 normalizedVelocity = controller.velocity;
-					t.position += t.forward * Vector3.Dot (t.forward, controller.velocity) * movementDelay;
-					t.position += t.up * Mathf.Abs (Vector3.Dot (t.forward, controller.velocity)) * -power;
-                
-                    //addcondition for foorwad and backward
-                    if(sawForward != null)
-                        sawForward.Play();
+                    float yForwForw = Vector3.Angle(normalizedVelocity, transform.forward);
+                    if (yForwForw < 15)
+                    {
+                        t.position += transform.forward * yForwForw * power;
+                    }
+                    else
+                    {
+                        float yForwUp = Vector3.Dot(transform.up, controller.velocity);
+                        t.position += transform.up * yForwUp * movementDelay;
+                        t.position += transform.forward * Mathf.Abs(yForwUp) * -power;
+
+                        //add condition for foorwad and backward
+                        if (sawForward != null)
+                            sawForward.Play();
+                    }
                 }
 			}
 		}
     }
 
-    // deprecated!!!
-    // Bewertung: Berechnung wie weit der Kollisionspunkt vom gewünschten entfernt ist
-    //
-    /* Wo liegt der gewünschte Schnittpunkt?
-     * -> center = 0,0,0 & scale = 1,1,1 =>
-     *  -> p = x,y,z
-     *  -> p auf Linie (center, forwardVec) projezieren
-     *  => p.z = Entfernung zum Mittelpunkt
-     *  => scaleA = 0.33, scaleB = 0.33, scaleC = 0.33
-     *  => s.z = scaleA / 2 || -scaleA / 2
-     *  
-     *  nächster Schnitt:
-     *  s.z = 0
-     *  
-     *  
-        Vector3 ab = gameObject.transform.forward;
-        Vector3 ap = localContactPoint;
-        Vector3 projectedConPoint = Vector3.Dot(ap, ab) / Vector3.Dot(ab, ab) * ab;
-        float distanceToCenter = projectedConPoint.z; 
+    void Update()
+    {
+        Pickup parent = parentTransform.GetComponent<Pickup>();
+        if (!isSawing && lastCutTimer < cutDelay)
+        {
+            lastCutTimer += Time.deltaTime;
+            if(lastCutTimer >= cutDelay)
+            {
+                lastCutTimer = cutDelay;
+            }
+        }
 
-    */
+        if(isSawing && parent.isPickedup && parentTransform.parent != null)
+        {
+            parentTransform.parent = null;
+        }
+    }
+
+    bool objectCanBeCut(GameObject cuttee)
+    {
+        return oldParent == null && cuttee.tag == "Wood" && lastCutTimer >= cutDelay;
+    }
 
     public void OnCollisionEnter(Collision collision)
     {
-		Debug.Log ("Collision");
-
         foreach (ContactPoint contact in collision.contacts)
         {
-            //wood = collision.gameObject.GetComponent<Divider>();
-            if (contact.otherCollider == collision.collider && oldParent == null && collision.gameObject.tag == "Wood")
+            if (contact.otherCollider == collision.collider && objectCanBeCut(collision.collider.gameObject))
             {
                 ControllerCube cc = gameObject.transform.parent.GetComponentInParent<ControllerCube>();
 				if (cc == null) {
 					Debug.Log ("could not find Your Hand i want to saw dude");
 					return;
 				}
-
                 if (Vector3.Dot((contact.point - transform.position).normalized, -transform.forward) < 0) {
                     Debug.Log("Hit wood at the wrong side => no sawing mode");
                     return;
@@ -113,15 +129,18 @@ public class Saw : MonoBehaviour {
                 Vector3 obpos = this.gameObject.transform.position;
                 initialContactPosition = obpos;
                 initialRotation = this.gameObject.transform.rotation;
-                initialRightVector = collision.gameObject.transform.rotation * this.gameObject.transform.right; // this.gameObject.transform.rotation * 
+                initialRightVector = collision.collider.transform.rotation * this.gameObject.transform.right; // this.gameObject.transform.rotation * 
                 Debug.Log("initialContactPoint: " + initialContactPoint.ToString());
-                cuttee = collision.gameObject;
+                cuttee = collision.collider.gameObject;
 				Rigidbody rb = cuttee.GetComponent<Rigidbody> ();
-				rb.isKinematic = true;
+                if(rb != null)
+				    rb.isKinematic = true;
 				enterSawingMode();
             }
         }
     }
+
+
 
     int tempLength = 0;
 
@@ -129,7 +148,6 @@ public class Saw : MonoBehaviour {
     {
         foreach (ContactPoint contact in collisionInfo.contacts)
         {
-            // Debug.DrawRay(contact.point, contact.normal * 10, Color.white);
             if (isSawing) {
                 Debug.DrawRay(contact.point, contact.normal * 10, Color.white);
             }
@@ -142,30 +160,63 @@ public class Saw : MonoBehaviour {
 
     public void OnCollisionExit(Collision collision)
     {
-        if(collision.gameObject.tag == "Wood")
-            Debug.Log("collision exit");
-        // && (initialContactPoint.y - collision.contacts[0].point.y) > 0.5
-
-        if (Vector3.Dot((initialContactPoint - transform.position).normalized, (transform.forward).normalized) < 0) {
-            Debug.Log("Exited wood on the wrong side => no cut");
-            return;
-        }
-
-        if (isSawing && collision.gameObject.tag == "Wood")
+        if(collision.gameObject.tag == "Wood" && isSawing) // && !triggerEntered
         {
-			cutObject (cuttee, collision);
+            float cutDirection = Vector3.Dot((initialContactPoint - transform.position).normalized, (transform.forward).normalized);
+            if (cutDirection < 0.2 || !triggerEntered)
+            {
+                Debug.Log("Exited wood on the wrong side => no cut, cutDirection: " + cutDirection);
+            }
+            else
+            {
+                cutObject(cuttee, collision);
+            }
+            endSawingMode();
+            cuttee = null;
         }
-
     }
 
 	void cutObject(GameObject cuttee, Collision collision){
-		Material capMaterial = defaultCapMaterial;
+        lastCutTimer = 0;
+        Material capMaterial = defaultCapMaterial;
 		Vector3 tempScale = cuttee.transform.localScale;
 		Vector3 tempPosition = cuttee.transform.position;
 		ToolUser1 tu = FindObjectOfType<ToolUser1>();
 
 		string preCutTag = cuttee.tag;
-        Vector3 cutterPosition = initialContactPoint; // - new Vector3(0, 1, 0);
+        Vector3 cutterPosition = initialContactPoint;
+
+        // TODO: initialRotation should be oriented towards the nearest glue if the object has already been glue to another object
+        // only relevant when the object is glued to another one, needs more work before it can be implemented correctly
+        //if(cuttee.transform.parent != null && cuttee.transform.parent.tag == "Wood")
+        //{
+        //    Vector3 toNearestGlue = new Vector3(0, 0, 0);
+        //    float minDist = -1;
+        //    glueMe[] siblings = cuttee.transform.parent.GetComponentsInChildren<glueMe>();
+        //    foreach(glueMe glue in siblings)
+        //    {
+        //        Vector3 toGlue = glue.transform.position - transform.position;
+        //        float currentDist = toGlue.magnitude;
+        //        if ( currentDist < minDist || minDist == -1)
+        //        {
+        //            minDist = currentDist;
+        //            toNearestGlue = toGlue;
+        //        }
+        //    }
+
+        //    float angleToNearestGlue = Vector3.Angle(transform.right, toNearestGlue);
+        //    if(angleToNearestGlue > 90)
+        //    {
+        //        initialRotation *= Quaternion.Euler(transform.up * 180);
+        //        // initialRotation = initialRotation * new Quaternion().
+        //    }
+        //}
+        //Rigidbody cutteRB = cuttee.GetComponent<Rigidbody>();
+        //if(cutteRB == null)
+        //{
+        //    cuttee.AddComponent<Rigidbody>();
+        //}
+
 		GameObject[] pieces = tu.cut(cutterPosition, initialRotation, cuttee);
 		foreach (var p in pieces)
 		{
@@ -190,28 +241,51 @@ public class Saw : MonoBehaviour {
 				triggerMeshCollider.isTrigger = true;
 			}
 
-			Rigidbody rb = p.GetComponent<Rigidbody>();
-			if (rb == null)
-				p.AddComponent<Rigidbody> ();
-			else {
-				rb.isKinematic = false;
-			}
+            if(cuttee.transform.parent != null && cuttee.transform.parent.tag == "Wood" && cuttee.GetComponent<Rigidbody>() != null)
+            {
+                Destroy(cuttee.GetComponent<Rigidbody>());
+            }
+            else
+            {
+                Rigidbody rb = p.GetComponent<Rigidbody>();
+                if (rb == null)
+                    p.AddComponent<Rigidbody>();
+                else
+                {
+                    rb.isKinematic = false;
+                }
+            }
+			
 			Pickup pickup = p.GetComponent<Pickup>();
 			if (pickup == null)
 				p.AddComponent<Pickup>();
 		}
+    }
 
-        endSawingMode();
+    void setCutteRigidbody()
+    {
+        if (cuttee != null)
+        {
+            Rigidbody cutteRB = cuttee.GetComponent<Rigidbody>();
+            if (cutteRB != null)
+            {
+                cutteRB.isKinematic = false;
+            }
+        }
     }
 
     void endSawingMode() {
         isSawing = false;
+        
+        setCutteRigidbody();
+
         Pickup pu = parentTransform.gameObject.GetComponent<Pickup>();
         if (pu != null)
         {
             pu.GetPickedUp(oldParent);
-            pu.gameObject.transform.position = oldParent.transform.position;
-            pu.gameObject.transform.rotation = oldParent.transform.rotation;
+            pu.gameObject.transform.localPosition = oldPositionToParent;
+            pu.gameObject.transform.localRotation = oldRotationToParent;
+            
         }
         oldParent = null;
     }
@@ -221,15 +295,8 @@ public class Saw : MonoBehaviour {
     {
         isSawing = true;
         oldParent = parentTransform.parent.gameObject;
-        Pickup pu = parentTransform.gameObject.GetComponent<Pickup>();
-        if(pu != null)
-        {
-            pu.gameObject.transform.parent = null;
-            // pu.GetReleased();
-        }
-        Debug.Log("sawing mode entered");
+        oldPositionToParent = parentTransform.localPosition;
+        oldRotationToParent = parentTransform.localRotation;
+        parentTransform.parent = null;
     }
-
-
-    
 }

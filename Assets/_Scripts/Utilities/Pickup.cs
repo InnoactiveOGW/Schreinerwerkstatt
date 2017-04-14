@@ -5,7 +5,6 @@ public class Pickup : Interactable
 {
     public bool isPickedup;
 
-
     public void GetPickedUp(GameObject byThisObject)
     {
         Transform tempParent = this.gameObject.transform;
@@ -15,8 +14,6 @@ public class Pickup : Interactable
 
     public void GetPickedUp(GameObject byThisObject, out Pickup pickedObj)
     {
-
-        // Transform nextParent = this.gameObject.transform.parent;
         Transform tempPickup = this.gameObject.transform;
         Pickup pu = this;
         while (tempPickup.parent != null)
@@ -28,15 +25,11 @@ public class Pickup : Interactable
             }
             tempPickup = tempPickup.parent;
         }
-
         pu.gameObject.transform.SetParent(byThisObject.transform);
         pu.isPickedup = true;
 
         // set out parameter
         pickedObj = pu;
-        
-               
-        // isPickedup = true;
     }
 
     public void GetReleased()

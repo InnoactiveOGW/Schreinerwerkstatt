@@ -17,19 +17,14 @@ public class CuttingGameController : GameController {
     private TextMesh txtScore;
     private TextMesh txtMiss;
 
-    public bool playing = true;
+    public bool playing = false;
+    
 
 	// Use this for initialization
 	void Start () {
         txtScore = scoreCounter.GetComponent<TextMesh>();
         txtMiss = missCounter.GetComponent<TextMesh>();
     }
-	
-	// Update is called once per frame
-	void Update () {
-        //if (miss >= 3)
-        //    playing = false;
-	}
 
     public void addScore(int newScore) {
         score += newScore;
@@ -42,5 +37,12 @@ public class CuttingGameController : GameController {
         txtMiss.text = miss.ToString();
     }
 
-
+    public void resetLevel()
+    {
+        score = 0;
+        miss = 0;
+        txtScore.text = score.ToString();
+        txtMiss.text = miss.ToString();
+        playing = true;
+    }
 }

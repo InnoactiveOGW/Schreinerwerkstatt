@@ -1,8 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.SceneManagement;
-using UnityEditor.SceneManagement;
-using UnityEditor;
 
 public class ResetAll : Interactable
 {
@@ -13,15 +10,10 @@ public class ResetAll : Interactable
     {
         audioClip = GetComponent<AudioSource>();
     }
-
-    // Update is called once per frame
-    void Update () {
-	
-	}
+   
     public override void interact(GameObject interactionGO)
     {
         audioClip.Play();
        SceneManager.LoadScene("MainScene");
-      
     }
 }
