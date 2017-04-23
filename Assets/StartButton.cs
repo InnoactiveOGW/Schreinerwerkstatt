@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ResetButton : Interactable {
-    
+public class StartButton : Interactable {
+
     AudioSource audioClip;
 
     void Start()
@@ -13,9 +13,6 @@ public class ResetButton : Interactable {
     public override void interact(GameObject interactionGO)
     {
         audioClip.Play();
-        GameController gc = FindObjectOfType<GameController>();
-        LevelControllerInterface lc = gc.getCurrentLevel();
-        if(lc != null)
-            lc.resetLevel();
+        EvalController.Instance.startStudy(interactionGO);
     }
 }

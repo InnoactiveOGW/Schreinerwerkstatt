@@ -30,12 +30,7 @@ public class FinishPlatform : MonoBehaviour {
 
     void finish(GameObject finishedObj)
     {
-        EvaluationCtrl evalC = finishedObj.GetComponent<EvaluationCtrl>();
-        if (evalC != null)
-        {
-            scoreText.text = evalC.rate().ToString("F1");
-            particle.Play();
-            Destroy(evalC.gameObject);
-        }
+        particle.Play();
+        Destroy(finishedObj);
     }
 }
