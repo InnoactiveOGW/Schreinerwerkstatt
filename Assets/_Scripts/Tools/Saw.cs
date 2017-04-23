@@ -20,6 +20,9 @@ public class Saw : MonoBehaviour {
     [SerializeField]
     float cutDelay;
 
+    [SerializeField]
+    string interactionType;
+
     public Material defaultCapMaterial;
 
     bool isSawing = false;
@@ -55,6 +58,11 @@ public class Saw : MonoBehaviour {
 	// Update is called once per frame
 	void FixedUpdate () {
         Pickup parent = parentTransform.GetComponent<Pickup>();
+        if(parent != null && parent.isPickedup)
+        {
+            GameController gc = FindObjectOfType<GameController>();
+            gc.setInteractionType(interactionType);
+        }
         if (isSawing && parent != null && parent.isPickedup) {
 			Transform t = parentTransform;
 			if (!Config.isVR) {

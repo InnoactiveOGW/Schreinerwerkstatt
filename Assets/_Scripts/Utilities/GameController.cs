@@ -9,18 +9,51 @@ public class GameController : MonoBehaviour {
     public int progress = 0;
     public int oldProgress = 0;
     public GameObject[] Hints;
-	
-	// Update is called once per frame
-	void FixedUpdate () {
+
+
+    [SerializeField]
+    LevelController autoLoadLevel;
+
+    [SerializeField]
+    bool showHints;
+
+    string interactionType;
+
+    void Start()
+    {
+        if(autoLoadLevel != null)
+        {
+            currentLevel = autoLoadLevel;
+        }
+    }
+
+    // Update is called once per frame
+    void FixedUpdate () {
         CheckandShowHelper();
 	}
 
+    public string getInteractionType()
+    {
+        return interactionType;
+    }
+
+    public void setInteractionType(string newType)
+    {
+        interactionType = newType;
+    }
+
     private void CheckandShowHelper()
     {
+        if (!showHints)
+        {
+            return;
+        }
+
         if (currentLevel == null)
         {
             ObserveProgessLevel0();
-        }else
+        }
+        else
         {
             switch (currentLevel.LevelNumber)
             {

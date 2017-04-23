@@ -2,10 +2,9 @@
 using System.Collections;
 
 public class ResetButton : Interactable {
-
-    // Use this for initialization
+    
     AudioSource audioClip;
-    // Use this for initialization
+
     void Start()
     {
         audioClip = GetComponent<AudioSource>();
