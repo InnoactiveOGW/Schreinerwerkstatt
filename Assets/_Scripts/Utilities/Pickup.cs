@@ -4,12 +4,37 @@ using System.Collections;
 public class Pickup : Interactable
 {
     public bool isPickedup;
+    Vector3 initPosition;
+    Quaternion initRotation;
+
+    void Start()
+    {
+        initPosition = transform.position;
+        initRotation = transform.rotation;
+    }
+
+    public void Reset()
+    {
+        transform.position = initPosition;
+        transform.rotation = initRotation;
+    }
 
     public void GetPickedUp(GameObject byThisObject)
     {
         Transform tempParent = this.gameObject.transform;
         tempParent.SetParent(byThisObject.transform);
         isPickedup = true;
+    }
+
+    public void GetPickedUp(GameObject byThisObject, bool align)
+    {
+        if (align)
+        {
+            this.transform.position = byThisObject.transform.position;
+            this.transform.rotation = byThisObject.transform.rotation;
+        }
+
+        GetPickedUp(byThisObject);
     }
 
     public void GetPickedUp(GameObject byThisObject, out Pickup pickedObj)

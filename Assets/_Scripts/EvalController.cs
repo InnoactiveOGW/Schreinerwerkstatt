@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System;
 
-public class EvalController : MonoBehaviour {
-
+public class EvalController : UnitySingleton<EvalController> {
 
     [SerializeField]
     GameObject woodPrefab;
@@ -14,31 +14,88 @@ public class EvalController : MonoBehaviour {
     Dictionary<string, List<float>> accuracyValues;
     Dictionary<string, List<float>> timeValues;
 
-    int numberOfTries;
+    int numberOfTries = 0;
 
-    float start_time;
-    float end_time;
+    [SerializeField]
+    string playerName;
 
-    public void startTimer()
+    [SerializeField]
+    ParticleSystem particle;
+
+    [SerializeField]
+    GameObject hand;
+
+    [SerializeField]
+    List<Pickup> saws;
+
+    Pickup currentSaw;
+    int sawCounter = 0;
+
+    float start_time = 0;
+
+    [SerializeField]
+    float maxTimePerStage = 60;
+
+    [SerializeField]
+    int maxNumberOfCuts = 2;
+
+    bool readyToSwitchSaw = false;
+
+    void Start()
     {
-        start_time = Time.time;
+        accuracyValues = new Dictionary<string, List<float>>();
+        timeValues = new Dictionary<string, List<float>>();
     }
 
-    void OnCollisionEnter(Collision collision) {
-        if(collision.gameObject.tag == "Wood")
+    //void Update()
+    //{
+    //    float current_time = Time.time;
+    //    if(current_time - start_time > maxTimePerStage)
+    //    {
+    //        // TODO
+    //        switchSaw();
+    //    }
+    //}
+
+    void switchSaw()
+    {
+        sawCounter++;
+        currentSaw.GetReleased();
+        currentSaw.Reset();
+        if (sawCounter < saws.Count)
         {
-            handleWoodCut(collision.gameObject);
+            currentSaw = saws[sawCounter];
+            currentSaw.GetPickedUp(hand, true);
         }
+        else
+        {
+            // TODO
+            writeValuesToFile();
+        }
+    }
+
+    public void startStudy(GameObject hand)
+    {
+        this.hand = hand;
+        Debug.Log("starting study");
+
+        start_time = Time.time;
+        foreach(Pickup saw in saws)
+        {
+            saw.GetReleased();
+        }
+        currentSaw = saws[sawCounter];
+        currentSaw.GetPickedUp(this.hand, true);
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        handleWoodCut(collision.gameObject);
     }
 
     void OnTriggerEnter(Collider collider)
     {
-        if (collider.gameObject.tag == "Wood")
-        {
-            handleWoodCut(collider.gameObject);
-            destroyAllWoods();
-            currentWood = Instantiate(woodPrefab);
-        }
+        handleWoodCut(collider.gameObject);
     }
 
     void destroyAllWoods()
@@ -52,55 +109,66 @@ public class EvalController : MonoBehaviour {
 
     void handleWoodCut(GameObject wood)
     {
+        if (wood.tag == "Wood")
+        {
+            destroyAllWoods();
+            particle.Play();
+            currentWood = Instantiate(woodPrefab);
+            if (numberOfTries >= maxNumberOfCuts)
+            {
+                numberOfTries = 0;
+                switchSaw();
+            }
+        }
+    }
+
+    public void evalWoodCut(Wood wood)
+    {
+        numberOfTries++;
         Debug.Log("handle wood cut");
         string interactionType = getInteractionType(wood);
         float accuracy = getAccuracy(wood);
         float time = getTime(wood);
 
-        List<float> accuracyForName = getListFromDic(interactionType, 0);
-        List<float> timeForName = getListFromDic(interactionType, 1);
+        List<float> accuracyForName = getListFromDic(interactionType, accuracyValues);
+        List<float> timeForName = getListFromDic(interactionType, timeValues);
         accuracyForName.Add(accuracy);
         timeForName.Add(time);
+
+        Debug.Log("Number of tries: " + numberOfTries + ", accuracy: " + accuracy + ", time: " + time);
     }
 
-    List<float> getListFromDic(string interactionType, int type)
+    List<float> getListFromDic(string interactionType, Dictionary<string, List<float>> dic)
     {
-        Dictionary<string, List<float>> dic = type == 0 ? accuracyValues : timeValues;
-        List <float> list = dic[interactionType];
-        if (list == null)
+        List<float> list = null;
+        bool interactionTypeListExists = dic.TryGetValue(interactionType, out list);
+        if (!interactionTypeListExists)
         {
             list = new List<float>();
-            accuracyValues.Add(interactionType, list);
+            dic.Add(interactionType, list);
         }
         return list;
     }
 
-    string getInteractionType(GameObject wood)
+    string getInteractionType(Wood wood)
     {
-        GameController gc = FindObjectOfType<GameController>();
-        return gc.getInteractionType();
+        return wood.interactionType;
     }
 
-    float getAccuracy(GameObject wood)
+    float getAccuracy(Wood wood)
     {
-        return 0; // TODO
+        return wood.accuracy;
     }
 
-    float getTime(GameObject wood)
+    float getTime(Wood wood)
     {
-        end_time = Time.time;
-        return end_time - start_time;
-    }
-
-    void spawnNewWood()
-    {
-        currentWood = Instantiate(woodPrefab);
+        return wood.time;
     }
 
     void writeValuesToFile()
     {
         using (System.IO.StreamWriter w = File.AppendText("log.txt")){
-            w.WriteLine("New user: "); // TODO: wie kommt der Nutzername in das Programm ?
+            w.WriteLine("New user: " + playerName);
             foreach(string interactionType in accuracyValues.Keys)
             {
                 w.WriteLine("Interaction type: " + interactionType);
@@ -115,7 +183,7 @@ public class EvalController : MonoBehaviour {
                 }
                 w.WriteLine("Number of accuracy values: " + accuracyValues[interactionType].Count);
                 w.WriteLine("Accuracy average: " + accSum / accuracyValues[interactionType].Count);
-
+                w.WriteLine("");
                 w.WriteLine("Time values: ");
                 float timeSum = 0;
                 counter = 0;
@@ -127,8 +195,13 @@ public class EvalController : MonoBehaviour {
                 }
                 w.WriteLine("Number of time values: " + timeValues[interactionType].Count);
                 w.WriteLine("Time average: " + timeSum / timeValues[interactionType].Count);
-                w.WriteLine("Number of Tests: " + numberOfTries);
+                w.WriteLine("---");
             }
+
+            w.WriteLine("Number of cuts: " + maxNumberOfCuts * accuracyValues.Keys.Count);
+
+            float end_time = Time.time;
+            w.WriteLine("Full time: " + (end_time - start_time));
             w.Close();
         }
     }

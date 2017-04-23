@@ -2,7 +2,7 @@
 using System.Collections;
 using System;
 
-public class GameController : MonoBehaviour {
+public class GameController : UnitySingleton<GameController> {
 
     LevelControllerInterface currentLevel;
 

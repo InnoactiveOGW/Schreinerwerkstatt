@@ -209,6 +209,9 @@ public class Saw : MonoBehaviour {
             */
         }
 
+        Wood woodComp = cuttee.GetComponent<Wood>();
+        woodComp.evalCut(Vector3.Dot(cuttee.transform.right, parentTransform.forward), this.interactionType);
+
         lastCutTimer = 0;
         Material capMaterial = defaultCapMaterial;
 		Vector3 tempScale = cuttee.transform.localScale;

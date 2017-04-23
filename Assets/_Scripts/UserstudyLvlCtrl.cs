@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class UserstudyLvlCtrl : LevelControllerInterface
+public class UserstudyLvlCtrl : UnitySingleton<UserstudyLvlCtrl>
 {
     Dictionary<string, Vector3> toolPositions = new Dictionary<string, Vector3>();
     Dictionary<string, Quaternion> toolRotations = new Dictionary<string, Quaternion>();
@@ -17,7 +17,7 @@ public class UserstudyLvlCtrl : LevelControllerInterface
         }
     }
 
-    public override void resetLevel()
+    public void resetLevel()
     {
         foreach (KeyValuePair<string, Vector3> entry in toolPositions)
         {
