@@ -40,6 +40,7 @@ public class EvalController : UnitySingleton<EvalController> {
     int maxNumberOfCuts = 2;
 
     bool readyToSwitchSaw = false;
+    bool startedStudy = false;
 
     void Start()
     {
@@ -86,6 +87,8 @@ public class EvalController : UnitySingleton<EvalController> {
         }
         currentSaw = saws[sawCounter];
         currentSaw.GetPickedUp(this.hand, true);
+        startedStudy = true;
+        numberOfTries = 0;
     }
 
     void OnCollisionEnter(Collision collision)
@@ -114,11 +117,15 @@ public class EvalController : UnitySingleton<EvalController> {
             destroyAllWoods();
             particle.Play();
             currentWood = Instantiate(woodPrefab);
-            if (numberOfTries >= maxNumberOfCuts)
+            if (startedStudy)
             {
-                numberOfTries = 0;
-                switchSaw();
+                if (numberOfTries >= maxNumberOfCuts)
+                {
+                    numberOfTries = 0;
+                    switchSaw();
+                }
             }
+            
         }
     }
 

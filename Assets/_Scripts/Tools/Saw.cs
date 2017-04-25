@@ -15,7 +15,7 @@ public class Saw : MonoBehaviour {
     bool highfidelity;
 
     [SerializeField]
-    bool snapToPoint;
+    public bool snapToPoint;
 
     [SerializeField]
     float cutDelay;

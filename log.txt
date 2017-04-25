@@ -96,3 +96,63 @@ Time values:
 Time average: 1.061111
 Number of cuts: 8
 Full time: 29.27914
+New user: Beni
+Interaction type: low fidelity
+Accuracy values: 
+0: -0.9934728, 1: -0.9207147, 2: -0.6021928, 3: -0.9408153, 4: -0.9744484, 5: -0.9868965, Number of accuracy values: 6
+Accuracy average: -0.9030902
+
+Time values: 
+0: 5.766667, 1: 1.511111, 2: 1.311111, 3: 1.655556, 4: 3.877778, 5: 1.277779, Number of time values: 6
+Time average: 2.566667
+---
+Interaction type: low fidelity + snapping
+Accuracy values: 
+0: -0.9753059, 1: -0.9621488, Number of accuracy values: 2
+Accuracy average: -0.9687274
+
+Time values: 
+0: 0.7222214, 1: 1.277779, Number of time values: 2
+Time average: 1
+---
+Number of cuts: 4
+Full time: 6.006659
+New user: Beni
+Interaction type: low fidelity + snapping
+Accuracy values: 
+0: -0.9944454, 1: -0.9398172, 2: -0.8806185, 3: -0.9729032, 4: -0.9678447, Number of accuracy values: 5
+Accuracy average: -0.9511258
+
+Time values: 
+0: 32.26667, 1: 1.91111, 2: 1.388889, 3: 1.17778, 4: 1.599998, Number of time values: 5
+Time average: 7.668889
+---
+Interaction type: high fidelity
+Accuracy values: 
+0: -0.9908801, 1: 0.2343302, Number of accuracy values: 2
+Accuracy average: -0.3782749
+
+Time values: 
+0: 6.900002, 1: 5.788891, Number of time values: 2
+Time average: 6.344446
+---
+Interaction type: high fidelity + snapping
+Accuracy values: 
+0: -0.9459124, 1: -0.9579168, Number of accuracy values: 2
+Accuracy average: -0.9519146
+
+Time values: 
+0: 5.611111, 1: 5.744442, Number of time values: 2
+Time average: 5.677776
+---
+Interaction type: low fidelity
+Accuracy values: 
+0: -0.9592297, 1: -0.9735166, Number of accuracy values: 2
+Accuracy average: -0.9663731
+
+Time values: 
+0: 1.166668, 1: 1.41111, Number of time values: 2
+Time average: 1.288889
+---
+Number of cuts: 8
+Full time: 31.1631
