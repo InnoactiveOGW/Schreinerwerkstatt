@@ -18,6 +18,9 @@ public class Saw : MonoBehaviour {
     public bool snapToPoint;
 
     [SerializeField]
+    public GameObject gizmo;
+
+    [SerializeField]
     float cutDelay;
 
     [SerializeField]
@@ -139,14 +142,40 @@ public class Saw : MonoBehaviour {
                     Debug.Log("Hit wood at the wrong side => no sawing mode");
                     return;
                 }
+
+                cuttee = collision.collider.gameObject;
+
+                if (snapToPoint)
+                {
+                    Wood wood = cuttee.GetComponent<Wood>();
+                    if (wood != null)
+                    {
+                        Transform gizmo = wood.sawGizmo.transform;
+                        RaycastHit hit;
+                        Vector3 fromGizmoToMarkerDirection = (wood.currentMarker.transform.position - gizmo.position).normalized;
+                        Debug.DrawLine(gizmo.position, fromGizmoToMarkerDirection, Color.red, 10000, false);
+                        if (Physics.Raycast(new Ray(gizmo.position, fromGizmoToMarkerDirection), out hit, float.PositiveInfinity, LayerMask.GetMask("WoodLayer")))
+                        {
+                            initialContactPoint = hit.point;
+                            initialRotation = gizmo.rotation;
+
+                            parentTransform.position = hit.point; // - fromGizmoToMarkerDirection * 0.1f;
+                            Debug.Log("hit.point: " + hit.point.ToString());
+                            parentTransform.rotation = gizmo.rotation;
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError("No wood component on cuttee!");
+                    }
+                }
 					
                 initialContactPoint = contact.point;
                 Vector3 obpos = this.gameObject.transform.position;
                 initialContactPosition = obpos;
                 initialRotation = this.gameObject.transform.rotation;
-                initialRightVector = collision.collider.transform.rotation * this.gameObject.transform.right; // this.gameObject.transform.rotation * 
-                Debug.Log("initialContactPoint: " + initialContactPoint.ToString());
-                cuttee = collision.collider.gameObject;
+                initialRightVector = collision.collider.transform.rotation * this.gameObject.transform.right;
+                
 				Rigidbody rb = cuttee.GetComponent<Rigidbody> ();
                 if(rb != null)
 				    rb.isKinematic = true;
@@ -182,7 +211,7 @@ public class Saw : MonoBehaviour {
 
     public void OnCollisionExit(Collision collision)
     {
-        if(collision.gameObject.tag == "Wood" && isSawing) // && !triggerEntered
+        if(collision.gameObject.tag == "Wood" && isSawing)
         {
             float cutDirection = Vector3.Dot((initialContactPoint - transform.position).normalized, (transform.forward).normalized);
             if (cutDirection < 0.2 || !triggerEntered)
@@ -199,29 +228,17 @@ public class Saw : MonoBehaviour {
     }
 
 	void cutObject(GameObject cuttee, Collision collision){
-        if (snapToPoint)
-        {
-            // TODO:
-            /*
-                 1. Ausrichten des blade Objekts nach einem der folgenden Vektoren: up, right, forward des cuttees
-                 2. sicherstellen, das RayCast des blad Objekts tatsächlich trifft
-                 3. fertig 
-            */
-        }
-
         Wood woodComp = cuttee.GetComponent<Wood>();
         woodComp.evalCut(Vector3.Dot(cuttee.transform.right, parentTransform.forward), this.interactionType);
 
         lastCutTimer = 0;
         Material capMaterial = defaultCapMaterial;
 		Vector3 tempScale = cuttee.transform.localScale;
-		Vector3 tempPosition = cuttee.transform.position;
+		// Vector3 tempPosition = cuttee.transform.position;
 		ToolUser1 tu = FindObjectOfType<ToolUser1>();
-
 		string preCutTag = cuttee.tag;
-        Vector3 cutterPosition = initialContactPoint;
 
-		GameObject[] pieces = tu.cut(cutterPosition, initialRotation, cuttee);
+		GameObject[] pieces = tu.cut(initialContactPoint, initialRotation, cuttee);
 		foreach (var p in pieces)
 		{
 			p.tag = preCutTag;

@@ -11,18 +11,17 @@ public class Wood : MonoBehaviour {
 
     float start_time;
     float end_time;
-
-    [SerializeField]
-    GameObject sawGizmo;
+    
+    public GameObject sawGizmo;
 
     List<Pickup> watchedPickups;
 
     bool activateMarkers = false;
     bool checkMarkers = false;
-    GameObject saw;
+    Saw saw;
 
     MagneticMarker[] markers;
-    MagneticMarker currentMarker;
+    public MagneticMarker currentMarker;
 
     public Material normalMaterial;
     public Material highlightMaterial;
@@ -31,7 +30,6 @@ public class Wood : MonoBehaviour {
     {
         start_time = Time.time;
         currentMarker = null;
-        sawGizmo = GameObject.Find("SawGizmo");
         markers = GetComponentsInChildren<MagneticMarker>();
         switchMarkers(false);
         activateMarkers = false;
@@ -60,6 +58,14 @@ public class Wood : MonoBehaviour {
         time = end_time - start_time;
         accuracy = newAcc;
         interactionType = newInteractionType;
+        if (currentMarker != null)
+            deactivateMarker(currentMarker);
+        if(sawGizmo != null)
+        {
+            sawGizmo.SetActive(false);
+            sawGizmo = null;
+        }
+
         EvalController.Instance.evalWoodCut(this);
     }
 
@@ -108,9 +114,7 @@ public class Wood : MonoBehaviour {
     void Update()
     {
         handleMarkers();
-        Saw s = GetSaw();
-        if(s != null)
-            saw = s.gameObject;
+        saw = GetSaw();
 
         if (checkMarkers && saw != null)
         {
@@ -133,6 +137,17 @@ public class Wood : MonoBehaviour {
             currentMarker = closestMarker;
             activateMarker(currentMarker);
         }
+        else if (!checkMarkers)
+        {
+            if (currentMarker != null)
+            {
+                deactivateMarker(currentMarker);
+            }
+            if(sawGizmo != null)
+            {
+                sawGizmo.SetActive(false);
+            }
+        }
     }
     
     void OnTriggerEnter(Collider collider)
@@ -154,10 +169,20 @@ public class Wood : MonoBehaviour {
     private void activateMarker(MagneticMarker marker)
     {
         marker.currentRenderer.material = highlightMaterial;
+        
+        sawGizmo = saw.gizmo;
+        sawGizmo.SetActive(true);
+        sawGizmo.transform.position = marker.transform.position + 0.2f * marker.transform.up; // + 0.3f * marker.transform.right;
+        sawGizmo.transform.rotation = Quaternion.AngleAxis(-90 ,marker.transform.up) * marker.transform.rotation;
     }
 
     private void deactivateMarker(MagneticMarker marker)
     {
         marker.currentRenderer.material = normalMaterial;
+        if (sawGizmo != null)
+        {
+            sawGizmo.SetActive(false);
+            sawGizmo = null;
+        }
     }
 }
