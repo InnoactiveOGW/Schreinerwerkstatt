@@ -166,10 +166,12 @@ public class Saw : MonoBehaviour {
                 {
                     cutObject(cuttee, collision);
                     cuttee = null;
-                    parentTransform.localPosition = oldPositionToParent;
-                    parentTransform.localRotation = oldRotationToParent;
+                    if (snapToPoint)
+                    {
+                        parentTransform.localPosition = oldPositionToParent;
+                        parentTransform.localRotation = oldRotationToParent;
+                    }
                 }
-				
             }
         }
     }
