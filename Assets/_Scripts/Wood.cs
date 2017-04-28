@@ -26,6 +26,8 @@ public class Wood : MonoBehaviour {
     public Material normalMaterial;
     public Material highlightMaterial;
 
+    bool canShowGizmo;
+
     void Start()
     {
         start_time = Time.time;
@@ -33,7 +35,7 @@ public class Wood : MonoBehaviour {
         markers = GetComponentsInChildren<MagneticMarker>();
         switchMarkers(false);
         activateMarkers = false;
-
+        canShowGizmo = true;
         watchedPickups = GetWatchedPickups();
     }
 
@@ -52,7 +54,7 @@ public class Wood : MonoBehaviour {
         return resultList;
     }
 
-    public void evalCut(float newAcc, string newInteractionType)
+    public void evalCut(float newAcc, string newInteractionType, Saw saw)
     {
         end_time = Time.time;
         time = end_time - start_time;
@@ -60,13 +62,9 @@ public class Wood : MonoBehaviour {
         interactionType = newInteractionType;
         if (currentMarker != null)
             deactivateMarker(currentMarker);
-        if(sawGizmo != null)
-        {
-            sawGizmo.SetActive(false);
-            sawGizmo = null;
-        }
+        canShowGizmo = false;
 
-        EvalController.Instance.evalWoodCut(this);
+        EvalController.Instance.evalWoodCut(this, saw);
     }
 
     void handleMarkers()
@@ -81,7 +79,7 @@ public class Wood : MonoBehaviour {
             }
         }
 
-        if(activateMarkers != temp)
+        if(activateMarkers != temp && canShowGizmo)
         {
             Debug.Log("(activateMarkers != temp");
             activateMarkers = temp;
@@ -115,6 +113,11 @@ public class Wood : MonoBehaviour {
     {
         handleMarkers();
         saw = GetSaw();
+
+        if (!canShowGizmo && sawGizmo != null && sawGizmo.activeSelf)
+        {
+            sawGizmo.SetActive(false);
+        }
 
         if (checkMarkers && saw != null)
         {
@@ -182,7 +185,7 @@ public class Wood : MonoBehaviour {
         if (sawGizmo != null)
         {
             sawGizmo.SetActive(false);
-            sawGizmo = null;
+            // sawGizmo = null;
         }
     }
 }

@@ -30,7 +30,7 @@ public class Pickup : Interactable
     {
         if (align)
         {
-            this.transform.position = byThisObject.transform.position;
+            this.transform.position = byThisObject.transform.position + byThisObject.transform.forward.normalized * 0.55f - byThisObject.transform.right.normalized * 0.05f;
             this.transform.rotation = byThisObject.transform.rotation;
         }
 

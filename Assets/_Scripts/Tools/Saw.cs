@@ -31,6 +31,7 @@ public class Saw : MonoBehaviour {
     bool isSawing = false;
     public bool triggerEntered = false;
     GameObject oldParent = null;
+
     Vector3 oldPositionToParent;
     Quaternion oldRotationToParent;
 
@@ -142,41 +143,18 @@ public class Saw : MonoBehaviour {
                     Debug.Log("Hit wood at the wrong side => no sawing mode");
                     return;
                 }
-
-                cuttee = collision.collider.gameObject;
-
+                
                 if (snapToPoint)
                 {
-                    Wood wood = cuttee.GetComponent<Wood>();
-                    if (wood != null)
-                    {
-                        Transform gizmo = wood.sawGizmo.transform;
-                        RaycastHit hit;
-                        Vector3 fromGizmoToMarkerDirection = (wood.currentMarker.transform.position - gizmo.position).normalized;
-                        Debug.DrawLine(gizmo.position, fromGizmoToMarkerDirection, Color.red, 10000, false);
-                        if (Physics.Raycast(new Ray(gizmo.position, fromGizmoToMarkerDirection), out hit, float.PositiveInfinity, LayerMask.GetMask("WoodLayer")))
-                        {
-                            initialContactPoint = hit.point;
-                            initialRotation = gizmo.rotation;
-
-                            parentTransform.position = hit.point; // - fromGizmoToMarkerDirection * 0.1f;
-                            Debug.Log("hit.point: " + hit.point.ToString());
-                            parentTransform.rotation = gizmo.rotation;
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogError("No wood component on cuttee!");
-                    }
+                    snapSawToGizmo(collision.collider.gameObject);
                 }
-					
                 initialContactPoint = contact.point;
                 Vector3 obpos = this.gameObject.transform.position;
                 initialContactPosition = obpos;
                 initialRotation = this.gameObject.transform.rotation;
                 initialRightVector = collision.collider.transform.rotation * this.gameObject.transform.right;
-                
-				Rigidbody rb = cuttee.GetComponent<Rigidbody> ();
+                cuttee = collision.collider.gameObject;
+                Rigidbody rb = cuttee.GetComponent<Rigidbody> ();
                 if(rb != null)
 				    rb.isKinematic = true;
 
@@ -193,7 +171,34 @@ public class Saw : MonoBehaviour {
             }
         }
     }
-    
+
+    private void snapSawToGizmo(GameObject currentCuttee)
+    {
+        Wood wood = currentCuttee.GetComponent<Wood>();
+        if (wood != null)
+        {
+            oldPositionToParent = parentTransform.localPosition;
+            oldRotationToParent = parentTransform.localRotation;
+
+            Transform gizmo = wood.sawGizmo.transform;
+            RaycastHit hit;
+            Vector3 fromGizmoToMarkerDirection = (wood.currentMarker.transform.position - gizmo.position).normalized;
+            Debug.DrawLine(gizmo.position, fromGizmoToMarkerDirection, Color.red, 10000, false);
+            if (Physics.Raycast(new Ray(gizmo.position, fromGizmoToMarkerDirection), out hit, float.PositiveInfinity, LayerMask.GetMask("WoodLayer")))
+            {
+                initialContactPoint = hit.point;
+                initialRotation = gizmo.rotation;
+                parentTransform.position = hit.point;
+                Debug.Log("hit.point: " + hit.point.ToString());
+                parentTransform.rotation = gizmo.rotation;
+            }
+        }
+        else
+        {
+            Debug.LogError("No wood component on cuttee!");
+        }
+    }
+
     public void OnCollisionStay(Collision collisionInfo)
     {
         int tempLength = 0;
@@ -229,7 +234,7 @@ public class Saw : MonoBehaviour {
 
 	void cutObject(GameObject cuttee, Collision collision){
         Wood woodComp = cuttee.GetComponent<Wood>();
-        woodComp.evalCut(Vector3.Dot(cuttee.transform.right, parentTransform.forward), this.interactionType);
+        woodComp.evalCut(Vector3.Dot(cuttee.transform.right, parentTransform.forward), this.interactionType, this);
 
         lastCutTimer = 0;
         Material capMaterial = defaultCapMaterial;
@@ -313,8 +318,11 @@ public class Saw : MonoBehaviour {
     {
         isSawing = true;
         oldParent = parentTransform.parent.gameObject;
-        oldPositionToParent = parentTransform.localPosition;
-        oldRotationToParent = parentTransform.localRotation;
+        if (!snapToPoint)
+        {
+            oldPositionToParent = parentTransform.localPosition;
+            oldRotationToParent = parentTransform.localRotation;
+        }
         parentTransform.parent = null;
     }
 }
